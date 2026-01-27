@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>사내 구매 주문 요청</title>
+
+  <!-- 주소검색(다음/카카오). 사내망에서 차단되면 주소검색이 안 뜰 수 있음 -->
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+  <style>
+    :root{
+      --bg:#f6f7f9; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
+      --accent:#111827; --danger:#b91c1c; --ok:#065f46; --shadow: 0 8px 24px rgba(17,24,39,.06);
+      --radius: 14px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR","맑은 고딕",Arial,sans-serif;background:var(--bg);color:var(--text);}
+    .container{max-width:980px;margin:0 auto;padding:22px 14px 48px;}
+    header{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;margin-bottom:14px;}
+    h1{margin:0;font-size:20px;letter-spacing:-.2px;}
+    .subtitle{margin:6px 0 0;font-size:12.5px;line-height:1.45;color:var(--muted);}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:12px;color:var(--muted);box-shadow:0 2px 10px rgba(17,24,39,.04);white-space:nowrap;}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+    .cardHeader{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center;}
+    .cardHeader h2{margin:0;font-size:14px;letter-spacing:-.1px;}
+    .cardHeader .sub{margin:6px 0 0;font-size:12px;color:var(--muted);}
+    .cardBody{padding:14px 16px;}
+    .muted{color:var(--muted)}
+    .btn{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:13px;}
+    .btn.primary{background:#111827;border-color:#111827;color:#fff;}
+    .btn:disabled{opacity:.55;cursor:not-allowed;}
+    .btn.danger{border-color:#fecaca;color:var(--danger);background:#fff;}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .divider{border:none;border-top:1px solid var(--line);margin:14px 0;}
+    .stepper{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px;}
+    .step{flex:1;min-width:140px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;}
+    .stepNum{width:26px;height:26px;border-radius:999px;border:1px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:12px;color:var(--muted);}
+    .step.active{border-color:#111827}
+    .step.active .stepNum{border-color:#111827;color:#111827}
+    .stepTitle{font-weight:900;font-size:13px;letter-spacing:-.1px;margin:0}
+    .stepDesc{margin:4px 0 0;font-size:12px;color:var(--muted);line-height:1.35}
+    .section{display:none}
+    .section.active{display:block}
+
+    /* products */
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+    .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 10px;font-size:13px;cursor:pointer;}
+    .tab.active{background:#111827;border-color:#111827;color:#fff;}
+    .products{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    @media (max-width:860px){.products{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:520px){.products{grid-template-columns:1fr}}
+    .product{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;background:#fff;}
+    .productTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+    .productName{margin:0;font-weight:900;font-size:13.5px;letter-spacing:-.1px;}
+    .productMeta{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.4}
+    .price{font-weight:900;white-space:nowrap}
+    .qty{width:82px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:14px;outline:none;}
+
+    /* cart */
+    .cartList{display:flex;flex-direction:column;gap:10px;}
+    .cartItem{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;display:flex;justify-content:space-between;gap:10px;}
+    .cartItem .name{margin:0;font-weight:900;font-size:13px;max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cartItem .meta{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.35;}
+    .mini{display:flex;gap:6px;align-items:center;justify-content:flex-end;}
+    .miniBtn{width:28px;height:28px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:900;display:grid;place-items:center;}
+    .miniQty{min-width:26px;text-align:center;font-weight:900;font-size:13px;}
+    .sumBox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;margin-top:10px;}
+    .sumRow{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:6px 0;}
+    .sumRow strong{font-weight:900}
+
+    /* forms */
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;}
+    input[type="text"], input[type="tel"], textarea{
+      width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;outline:none;background:#fff;
+    }
+    textarea{min-height:90px;resize:vertical;}
+    .form{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    @media (max-width:520px){.form{grid-template-columns:1fr}}
+    .help{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5}
+
+    /* modal */
+    .backdrop{position:fixed;inset:0;background:rgba(17,24,39,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;}
+    .backdrop.open{display:flex;}
+    .modal{width:min(820px,100%);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 50px rgba(17,24,39,.18);overflow:hidden;}
+    .modalHeader{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+    .modalHeader h3{margin:0;font-size:15px;letter-spacing:-.1px;}
+    .modalBody{padding:14px 16px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;}
+    th{font-size:12px;color:var(--muted);font-weight:900;}
+    .tfoot td{font-weight:900;border-bottom:none;padding-top:12px;}
+    .status{font-size:12px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted);white-space:nowrap;}
+    .status.ok{border-color:#bbf7d0;color:var(--ok);background:#f0fdf4;}
+    .status.err{border-color:#fecaca;color:var(--danger);background:#fff1f2;}
+
+    /* gate */
+    .policy{font-size:12px;line-height:1.6;background:#f9fafb;border:1px solid var(--line);border-radius:12px;padding:12px;max-height:260px;overflow:auto;}
+    .checkRow{display:flex;gap:10px;align-items:flex-start;margin-top:12px;}
+    .toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 12px;border-radius:999px;font-size:13px;box-shadow:0 12px 30px rgba(17,24,39,.22);opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease;z-index:60;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+    /* address search layer (embed) */
+    .addrLayer{
+      display:none;
+      border:1px solid var(--line);
+      border-radius:12px;
+      overflow:hidden;
+      height:420px;
+      background:#fff;
+      margin-top:10px;
+    }
+    .addrLayer.open{display:block;}
+  </style>
+</head>
+
+<body>
+  <div class="container" id="app" style="display:none;">
+    <header>
+      <div>
+        <h1>사내 구매 주문 요청</h1>
+        <p class="subtitle">관리자 승인 후 <b>택배로만</b> 발송됩니다. 배송비는 <b>무료</b>입니다.</p>
+      </div>
+      <div class="pill">출고: <b>택배발송</b> · 배송비: <b>0원</b></div>
+    </header>
+
+    <div class="stepper">
+      <div class="step active" id="step1"><div class="stepNum">1</div><div><p class="stepTitle">상품 선택</p><p class="stepDesc">카테고리에서 담기</p></div></div>
+      <div class="step" id="step2"><div class="stepNum">2</div><div><p class="stepTitle">주문자 정보</p><p class="stepDesc">요청자 입력</p></div></div>
+      <div class="step" id="step3"><div class="stepNum">3</div><div><p class="stepTitle">수령자/주소</p><p class="stepDesc">배송 정보 입력</p></div></div>
+      <div class="step" id="step4"><div class="stepNum">4</div><div><p class="stepTitle">최종 확인</p><p class="stepDesc">요약 후 제출</p></div></div>
+    </div>
+
+    <div class="card">
+      <div class="cardBody">
+
+        <!-- SECTION 1 -->
+        <div class="section active" id="section1">
+          <div class="row" style="justify-content:space-between;">
+            <div>
+              <h2 style="margin:0;font-size:15px;letter-spacing:-.1px;">상품 선택</h2>
+              <div class="muted" style="font-size:12px;margin-top:6px;">카테고리별로 담고, 오른쪽에서 수량 조절하세요.</div>
+            </div>
+            <button class="btn danger" id="clearCartBtn" disabled>장바구니 비우기</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="tabs" id="tabs"></div>
+          <div class="products" id="products"></div>
+
+          <div class="sumBox">
+            <div class="sumRow"><span class="muted">상품 합계</span><strong id="itemsTotal">0원</strong></div>
+            <div class="sumRow"><span class="muted">배송비</span><strong>0원</strong></div>
+            <div class="sumRow"><span>총 결제금액(실결제 없음)</span><strong id="grandTotal">0원</strong></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row" style="justify-content:flex-end;">
+            <button class="btn primary" id="toStep2" disabled>다음</button>
+          </div>
+        </div>
+
+        <!-- SECTION 2 -->
+        <div class="section" id="section2">
+          <h2 style="margin:0;font-size:15px;letter-spacing:-.1px;">주문자(요청자) 정보</h2>
+          <div class="muted" style="font-size:12px;margin-top:6px;">주문은 회사 사람이 해도, 수령자는 가족/지인으로 설정 가능합니다.</div>
+
+          <div class="divider"></div>
+
+          <div class="form">
+            <div>
+              <label>주문자 이름 *</label>
+              <input type="text" id="ordererName" placeholder="예) 홍길동">
+            </div>
+            <div>
+              <label>주문자 연락처</label>
+              <input type="tel" id="ordererPhone" placeholder="예) 010-1234-5678">
+            </div>
+            <div style="grid-column:1 / -1;">
+              <label>부서 *</label>
+              <input type="text" id="ordererDept" placeholder="예) 영업지원팀">
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row" style="justify-content:space-between;">
+            <button class="btn" id="backTo1">이전</button>
+            <button class="btn primary" id="toStep3" disabled>다음</button>
+          </div>
+        </div>
+
+        <!-- SECTION 3 -->
+        <div class="section" id="section3">
+          <h2 style="margin:0;font-size:15px;letter-spacing:-.1px;">수령자(배송 정보)</h2>
+          <div class="muted" style="font-size:12px;margin-top:6px;">출고는 택배발송만 가능하며 무료배송입니다.</div>
+
+          <div class="divider"></div>
+
+          <div class="form">
+            <div>
+              <label>수령인 이름 *</label>
+              <input type="text" id="recvName" placeholder="예) 김철수">
+            </div>
+            <div>
+              <label>수령인 연락처 *</label>
+              <input type="tel" id="recvPhone" placeholder="예) 010-0000-0000">
+            </div>
+
+            <div>
+              <label>우편번호 *</label>
+              <input type="text" id="zip" readonly placeholder="주소 검색으로 자동입력">
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn" id="addrSearchBtn" type="button" style="width:100%;">주소 검색</button>
+            </div>
+
+            <div style="grid-column:1 / -1;">
+              <label>기본주소(도로명/지번) *</label>
+              <input type="text" id="addr1" readonly placeholder="주소 검색으로 자동입력">
+            </div>
+            <div style="grid-column:1 / -1;">
+              <label>상세주소 *</label>
+              <input type="text" id="addr2" placeholder="예) 101동 1203호">
+            </div>
+          </div>
+
+          <!-- 주소검색 embed 영역 -->
+          <div class="addrLayer" id="addrLayer"></div>
+
+          <div class="help" id="addrHelp"></div>
+
+          <div class="divider"></div>
+
+          <div class="row" style="justify-content:space-between;">
+            <button class="btn" id="backTo2">이전</button>
+            <button class="btn primary" id="toStep4" disabled>다음</button>
+          </div>
+        </div>
+
+        <!-- SECTION 4 -->
+        <div class="section" id="section4">
+          <h2 style="margin:0;font-size:15px;letter-spacing:-.1px;">최종 확인</h2>
+          <div class="muted" style="font-size:12px;margin-top:6px;">요약을 확인하고 제출하세요.</div>
+
+          <div class="divider"></div>
+
+          <div class="cartList" id="cartList"></div>
+
+          <div class="sumBox">
+            <div class="sumRow"><span class="muted">상품 합계</span><strong id="itemsTotal2">0원</strong></div>
+            <div class="sumRow"><span class="muted">배송비</span><strong>0원</strong></div>
+            <div class="sumRow"><span>총 결제금액(실결제 없음)</span><strong id="grandTotal2">0원</strong></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <label>비고</label>
+          <textarea id="note" placeholder="예) 문 앞에 놓아주세요 / 부재 시 연락 부탁드립니다."></textarea>
+
+          <div class="divider"></div>
+
+          <div class="row" style="justify-content:space-between;">
+            <button class="btn" id="backTo3">이전</button>
+            <button class="btn primary" id="submitBtn">제출 전 요약 보기</button>
+          </div>
+
+          <div class="help">제출 후에는 관리자가 승인 절차를 진행합니다.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Gate (동의) -->
+  <div class="backdrop open" id="gateBackdrop" aria-hidden="false">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+      <div class="modalHeader">
+        <h3 id="gateTitle">주문 전 필수 안내</h3>
+        <span class="status err">동의 필요</span>
+      </div>
+      <div class="modalBody">
+        <div class="policy">
+          <b>[필수 확인 사항]</b><br><br>
+          1) 본 페이지는 <b>사내 승인용 주문 요청</b>이며, 결제는 발생하지 않습니다.<br>
+          2) 신청한 물품은 내부 기준에 따라 <b>승인/반려</b>될 수 있습니다.<br>
+          3) 출고는 <b>택배발송만 가능</b>하며, 배송비는 <b>전액 무료</b>입니다.<br>
+          4) 수령자/주소/연락처 오류로 인한 배송 문제는 재발송이 제한될 수 있습니다.<br>
+          5) 입력 정보는 주문 처리 목적에 한해 사용됩니다.<br><br>
+          위 내용을 확인했으며, 정확한 정보를 입력하겠습니다.
+        </div>
+        <div class="checkRow">
+          <input type="checkbox" id="agreeChk">
+          <div>
+            <b>위 안내사항을 모두 읽었고 동의합니다.</b><br>
+            <span class="muted" style="font-size:12px;">체크 후 “시작하기”를 눌러주세요.</span>
+          </div>
+        </div>
+        <div class="row" style="justify-content:flex-end;margin-top:12px;">
+          <button class="btn primary" id="startBtn" disabled>시작하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Modal -->
+  <div class="backdrop" id="summaryBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
+      <div class="modalHeader">
+        <h3 id="summaryTitle">제출 요약</h3>
+        <button class="btn" id="closeSummaryBtn">닫기</button>
+      </div>
+      <div class="modalBody">
+        <div class="card" style="box-shadow:none;">
+          <div class="cardBody" style="padding:12px;">
+            <div style="display:grid;grid-template-columns:120px 1fr;gap:8px 10px;font-size:13px;line-height:1.35;" id="summaryKV"></div>
+          </div>
+        </div>
+
+        <div class="card" style="box-shadow:none;margin-top:10px;">
+          <div class="cardBody" style="padding:12px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>카테고리</th>
+                  <th>상품</th>
+                  <th style="text-align:right;">단가</th>
+                  <th style="text-align:right;">수량</th>
+                  <th style="text-align:right;">합계</th>
+                </tr>
+              </thead>
+              <tbody id="summaryItems"></tbody>
+              <tfoot>
+                <tr class="tfoot">
+                  <td colspan="4" style="text-align:right;">상품 합계</td>
+                  <td id="summaryItemsTotal" style="text-align:right;"></td>
+                </tr>
+                <tr class="tfoot">
+                  <td colspan="4" style="text-align:right;">배송비</td>
+                  <td style="text-align:right;">0원</td>
+                </tr>
+                <tr class="tfoot">
+                  <td colspan="4" style="text-align:right;">총 결제금액(실결제 없음)</td>
+                  <td id="summaryGrandTotal" style="text-align:right;"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div class="row" style="justify-content:flex-end;margin-top:10px;">
+          <span class="status" id="sendStatus">전송 대기</span>
+          <button class="btn" id="copyJsonBtn">JSON 복사</button>
+          <button class="btn primary" id="confirmSendBtn">최종 제출</button>
+        </div>
+
+        <div class="help">사이트에는 연동 관련 문구를 노출하지 않습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**********************************************************
+     * (숨김) 제출 엔드포인트: 사이트에는 언급/표시 없음
+     **********************************************************/
+    const WEB_APP_URL = ""; // 비워두면 콘솔에만 기록
+
+    const CATEGORIES = [
+      { key: "면도용품", label: "면도용품" },
+      { key: "주방용품", label: "주방용품" },
+      { key: "커터기", label: "커터기" },
+    ];
+
+    const PRODUCTS = [
+      { id: "RZ-01", category: "면도용품", name: "면도기 핸들", price: 3500, desc: "기본 핸들 1EA" },
+      { id: "RZ-02", category: "면도용품", name: "면도날 4입", price: 4200, desc: "리필 4EA" },
+      { id: "RZ-03", category: "면도용품", name: "쉐이빙 폼", price: 5800, desc: "폼 1EA" },
+      { id: "RZ-04", category: "면도용품", name: "애프터쉐이브 로션", price: 8900, desc: "로션 1EA" },
+
+      { id: "KT-01", category: "주방용품", name: "주방세제", price: 4200, desc: "세제 1EA" },
+      { id: "KT-02", category: "주방용품", name: "수세미 3입", price: 3000, desc: "수세미 3EA" },
+      { id: "KT-03", category: "주방용품", name: "키친타월 2롤", price: 4500, desc: "키친타월 2ROLL" },
+      { id: "KT-04", category: "주방용품", name: "고무장갑", price: 2900, desc: "장갑 1SET" },
+
+      { id: "CT-01", category: "커터기", name: "커터기 본체", price: 5200, desc: "본체 1EA" },
+      { id: "CT-02", category: "커터기", name: "커터날 10입", price: 3300, desc: "리필 10EA" },
+      { id: "CT-03", category: "커터기", name: "안전 커터", price: 7900, desc: "안전형 1EA" },
+    ];
+
+    const state = {
+      activeCategory: CATEGORIES[0].key,
+      cart: new Map(),
+      shipFee: 0
+    };
+
+    const el = (id) => document.getElementById(id);
+    const fmt = (n) => new Intl.NumberFormat("ko-KR").format(n);
+
+    function toast(msg){
+      const t = el("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(()=>t.classList.remove("show"), 1600);
+    }
+
+    function calcItemsTotal(){
+      let total = 0;
+      for (const {product, qty} of state.cart.values()) total += product.price * qty;
+      return total;
+    }
+    function calcGrandTotal(){ return calcItemsTotal() + state.shipFee; }
+
+    function setStep(active){
+      ["1","2","3","4"].forEach(n=>{
+        el("step"+n).classList.toggle("active", n===String(active));
+        el("section"+n).classList.toggle("active", n===String(active));
+      });
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+
+    function validateStepButtons(){
+      // step1: cart required
+      el("toStep2").disabled = !(state.cart.size > 0);
+
+      // step2: orderer required
+      const ordererOk = el("ordererName").value.trim() && el("ordererDept").value.trim();
+      el("toStep3").disabled = !(state.cart.size > 0 && ordererOk);
+
+      // step3: recipient/address required
+      const recvOk = el("recvName").value.trim() && el("recvPhone").value.trim();
+      const addrOk = el("zip").value.trim() && el("addr1").value.trim() && el("addr2").value.trim();
+      el("toStep4").disabled = !(state.cart.size > 0 && ordererOk && recvOk && addrOk);
+
+      el("clearCartBtn").disabled = !(state.cart.size > 0);
+    }
+
+    function renderTabs(){
+      const wrap = el("tabs");
+      wrap.innerHTML = "";
+      for (const c of CATEGORIES){
+        const b = document.createElement("button");
+        b.className = "tab" + (c.key === state.activeCategory ? " active" : "");
+        b.textContent = c.label;
+        b.onclick = ()=>{ state.activeCategory = c.key; renderTabs(); renderProducts(); };
+        wrap.appendChild(b);
+      }
+    }
+
+    function renderProducts(){
+      const wrap = el("products");
+      wrap.innerHTML = "";
+      const list = PRODUCTS.filter(p=>p.category===state.activeCategory);
+
+      for (const p of list){
+        const card = document.createElement("div");
+        card.className = "product";
+
+        const top = document.createElement("div");
+        top.className = "productTop";
+
+        const left = document.createElement("div");
+        const name = document.createElement("p");
+        name.className = "productName";
+        name.textContent = p.name;
+
+        const meta = document.createElement("p");
+        meta.className = "productMeta";
+        meta.textContent = `${p.id} · ${p.desc}`;
+
+        left.appendChild(name);
+        left.appendChild(meta);
+
+        const price = document.createElement("div");
+        price.className = "price";
+        price.textContent = `${fmt(p.price)}원`;
+
+        top.appendChild(left);
+        top.appendChild(price);
+
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const qty = document.createElement("input");
+        qty.type="number"; qty.min="1"; qty.step="1"; qty.value="1"; qty.className="qty";
+
+        const btn = document.createElement("button");
+        btn.className="btn primary"; btn.textContent="담기";
+        btn.onclick = ()=>{
+          const q = Math.max(1, parseInt(qty.value||"1",10));
+          addToCart(p.id, q);
+        };
+
+        row.appendChild(qty);
+        row.appendChild(btn);
+
+        card.appendChild(top);
+        card.appendChild(row);
+        wrap.appendChild(card);
+      }
+    }
+
+    function addToCart(productId, qty){
+      const product = PRODUCTS.find(x=>x.id===productId);
+      if(!product) return;
+      if(state.cart.has(productId)){
+        const cur = state.cart.get(productId);
+        cur.qty += qty;
+        state.cart.set(productId, cur);
+      }else{
+        state.cart.set(productId, {product, qty});
+      }
+      renderCartForStep4();
+      renderTotals();
+      validateStepButtons();
+      toast("장바구니에 담았습니다");
+    }
+
+    function changeQty(productId, delta){
+      if(!state.cart.has(productId)) return;
+      const cur = state.cart.get(productId);
+      cur.qty += delta;
+      if(cur.qty<=0) state.cart.delete(productId);
+      else state.cart.set(productId, cur);
+      renderCartForStep4();
+      renderTotals();
+      validateStepButtons();
+    }
+
+    function clearCart(){
+      state.cart.clear();
+      renderCartForStep4();
+      renderTotals();
+      validateStepButtons();
+      toast("장바구니를 비웠습니다");
+      setStep(1);
+    }
+
+    function renderTotals(){
+      const itemsTotal = calcItemsTotal();
+      const grandTotal = calcGrandTotal();
+      el("itemsTotal").textContent = `${fmt(itemsTotal)}원`;
+      el("grandTotal").textContent = `${fmt(grandTotal)}원`;
+      el("itemsTotal2").textContent = `${fmt(itemsTotal)}원`;
+      el("grandTotal2").textContent = `${fmt(grandTotal)}원`;
+    }
+
+    function renderCartForStep4(){
+      const wrap = el("cartList");
+      wrap.innerHTML = "";
+      if(state.cart.size===0){
+        const d = document.createElement("div");
+        d.className="sumBox";
+        d.innerHTML = `<div class="muted" style="font-size:12px;">장바구니가 비어있습니다. 1단계에서 상품을 담아주세요.</div>`;
+        wrap.appendChild(d);
+        return;
+      }
+      for(const [id,{product,qty}] of state.cart.entries()){
+        const item = document.createElement("div");
+        item.className="cartItem";
+        item.innerHTML = `
+          <div>
+            <p class="name">${product.name}</p>
+            <p class="meta">${product.category} · ${product.id} · 단가 ${fmt(product.price)}원</p>
+          </div>
+          <div style="text-align:right;">
+            <div class="mini">
+              <button class="miniBtn" type="button" data-minus="${id}">−</button>
+              <div class="miniQty">${qty}</div>
+              <button class="miniBtn" type="button" data-plus="${id}">+</button>
+            </div>
+            <div style="margin-top:6px;font-weight:900;">${fmt(product.price*qty)}원</div>
+          </div>
+        `;
+        wrap.appendChild(item);
+      }
+
+      wrap.querySelectorAll("[data-minus]").forEach(b=>{
+        b.onclick = ()=>changeQty(b.dataset.minus, -1);
+      });
+      wrap.querySelectorAll("[data-plus]").forEach(b=>{
+        b.onclick = ()=>changeQty(b.dataset.plus, +1);
+      });
+    }
+
+    /* 주소검색: 팝업 대신 embed (반응없음 이슈 회피) */
+    function openAddressSearchEmbed(){
+      const help = el("addrHelp");
+      help.textContent = "";
+
+      if (!window.daum || !daum.Postcode){
+        help.textContent = "주소 검색 서비스를 불러오지 못했습니다. (사내망에서 차단되었을 수 있어요) 우편번호/주소를 수동 입력으로 전환해야 합니다.";
+        toast("주소검색 로드 실패");
+        return;
+      }
+
+      const layer = el("addrLayer");
+      layer.classList.add("open");
+
+      new daum.Postcode({
+        oncomplete: function(data){
+          const addr = data.roadAddress || data.jibunAddress || "";
+          el("zip").value = data.zonecode || "";
+          el("addr1").value = addr;
+          layer.classList.remove("open");
+          el("addr2").focus();
+          validateStepButtons();
+        },
+        onresize: function(size){
+          layer.style.height = Math.max(380, size.height) + "px";
+        },
+        width: "100%",
+        height: "100%"
+      }).embed(layer);
+    }
+
+    function buildPayload(){
+      const items = [];
+      for (const {product, qty} of state.cart.values()){
+        items.push({
+          id: product.id,
+          category: product.category,
+          name: product.name,
+          unit_price: product.price,
+          qty,
+          line_total: product.price * qty
+        });
+      }
+      const now = new Date();
+      const orderId = `ORD-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}-${now.getTime().toString().slice(-6)}`;
+
+      return {
+        order_id: orderId,
+        created_at: now.toISOString(),
+        orderer: {
+          name: el("ordererName").value.trim(),
+          phone: el("ordererPhone").value.trim(),
+          dept: el("ordererDept").value.trim()
+        },
+        recipient: {
+          name: el("recvName").value.trim(),
+          phone: el("recvPhone").value.trim(),
+          address: {
+            zip: el("zip").value.trim(),
+            addr1: el("addr1").value.trim(),
+            addr2: el("addr2").value.trim()
+          }
+        },
+        shipping: { method: "택배발송", fee: 0 },
+        note: el("note").value.trim(),
+        items,
+        items_total: calcItemsTotal(),
+        grand_total: calcGrandTotal()
+      };
+    }
+
+    function openSummary(){
+      const payload = buildPayload();
+
+      const kv = el("summaryKV");
+      kv.innerHTML = "";
+      const rows = [
+        ["주문번호", payload.order_id],
+        ["요청일시", new Date(payload.created_at).toLocaleString("ko-KR")],
+        ["주문자", `${payload.orderer.name} (${payload.orderer.dept})`],
+        ["주문자 연락처", payload.orderer.phone || "-"],
+        ["수령자", payload.recipient.name],
+        ["수령자 연락처", payload.recipient.phone],
+        ["배송지", `(${payload.recipient.address.zip}) ${payload.recipient.address.addr1} ${payload.recipient.address.addr2}`],
+        ["출고/배송비", "택배발송 / 0원(무료배송)"],
+        ["비고", payload.note || "-"],
+      ];
+      rows.forEach(([k,v])=>{
+        const kEl = document.createElement("div"); kEl.style.color="var(--muted)"; kEl.textContent = k;
+        const vEl = document.createElement("div"); vEl.style.fontWeight="900"; vEl.textContent = v;
+        kv.appendChild(kEl); kv.appendChild(vEl);
+      });
+
+      const body = el("summaryItems");
+      body.innerHTML = "";
+      payload.items.forEach(it=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${it.category}</td>
+          <td>${it.name}</td>
+          <td style="text-align:right;">${fmt(it.unit_price)}원</td>
+          <td style="text-align:right;">${fmt(it.qty)}</td>
+          <td style="text-align:right;">${fmt(it.line_total)}원</td>
+        `;
+        body.appendChild(tr);
+      });
+
+      el("summaryItemsTotal").textContent = `${fmt(payload.items_total)}원`;
+      el("summaryGrandTotal").textContent = `${fmt(payload.grand_total)}원`;
+
+      el("sendStatus").className = "status";
+      el("sendStatus").textContent = "전송 대기";
+
+      el("copyJsonBtn").onclick = async ()=>{
+        try{
+          await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+          toast("JSON을 복사했습니다");
+        }catch{
+          toast("복사 실패: 브라우저 권한 확인");
+        }
+      };
+
+      el("confirmSendBtn").onclick = ()=>submit(payload);
+
+      el("summaryBackdrop").classList.add("open");
+      el("summaryBackdrop").setAttribute("aria-hidden","false");
+    }
+
+    function closeSummary(){
+      el("summaryBackdrop").classList.remove("open");
+      el("summaryBackdrop").setAttribute("aria-hidden","true");
+    }
+
+    async function submit(payload){
+      const st = el("sendStatus");
+      st.className="status"; st.textContent="전송 중...";
+
+      if(!WEB_APP_URL){
+        console.log("ORDER_PAYLOAD:", payload);
+        st.className="status ok"; st.textContent="제출 완료";
+        toast("제출 완료");
+        resetAfterSubmit();
+        return;
+      }
+
+      try{
+        const res = await fetch(WEB_APP_URL, {
+          method:"POST",
+          mode:"cors",
+          headers:{ "Content-Type":"text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(()=>({}));
+        if(res.ok && data.ok){
+          st.className="status ok"; st.textContent="제출 완료";
+          toast("제출 완료");
+          resetAfterSubmit();
+        }else{
+          st.className="status err"; st.textContent="제출 실패";
+          toast("제출 실패");
+          console.error("submit failed:", data);
+        }
+      }catch(e){
+        st.className="status err"; st.textContent="제출 실패";
+        toast("네트워크/권한 문제");
+        console.error(e);
+      }
+    }
+
+    function resetAfterSubmit(){
+      state.cart.clear();
+      renderCartForStep4();
+      renderTotals();
+      validateStepButtons();
+      closeSummary();
+      el("note").value = "";
+      setStep(1);
+    }
+
+    function initGate(){
+      el("agreeChk").addEventListener("change", e=>{
+        el("startBtn").disabled = !e.target.checked;
+      });
+      el("startBtn").onclick = ()=>{
+        el("gateBackdrop").classList.remove("open");
+        el("gateBackdrop").setAttribute("aria-hidden","true");
+        el("app").style.display = "";
+        toast("동의 확인 완료");
+      };
+    }
+
+    function init(){
+      initGate();
+
+      // Step navigation
+      el("toStep2").onclick = ()=>setStep(2);
+      el("toStep3").onclick = ()=>setStep(3);
+      el("toStep4").onclick = ()=>setStep(4);
+      el("backTo1").onclick = ()=>setStep(1);
+      el("backTo2").onclick = ()=>setStep(2);
+      el("backTo3").onclick = ()=>setStep(3);
+
+      // Cart
+      el("clearCartBtn").onclick = clearCart;
+
+      // Form input validation
+      ["ordererName","ordererPhone","ordererDept","recvName","recvPhone","zip","addr1","addr2","note"].forEach(id=>{
+        el(id).addEventListener("input", validateStepButtons);
+      });
+
+      // Address
+      el("addrSearchBtn").onclick = openAddressSearchEmbed;
+
+      // Submit flow
+      el("submitBtn").onclick = openSummary;
+      el("closeSummaryBtn").onclick = closeSummary;
+      el("summaryBackdrop").addEventListener("click", e=>{
+        if(e.target===el("summaryBackdrop")) closeSummary();
+      });
+
+      // Render
+      renderTabs();
+      renderProducts();
+      renderCartForStep4();
+      renderTotals();
+      validateStepButtons();
+    }
+
+    init();
+  </script>
+</body>
+</html>
