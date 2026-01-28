@@ -515,7 +515,7 @@
     /**********************************************************
      * (숨김) 제출 엔드포인트: 사이트에는 언급/표시 없음
      **********************************************************/
-    const WEB_APP_URL = ""; // 비워두면 콘솔에만 기록
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzm2Yjy6K5hj8o79IL-_YTgMyD7VTi9VO0JJEfhOzo42rHOhOhTAMpeOPO5chpggPLW/exec"; // 비워두면 콘솔에만 기록
 
     /**********************************************************
      * 입금 안내 문구(계좌번호는 placeholder)
@@ -979,7 +979,6 @@
       try{
         const res = await fetch(WEB_APP_URL, {
           method:"POST",
-          mode:"cors",
           headers:{ "Content-Type":"text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
