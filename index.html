@@ -79,7 +79,14 @@
       width:64px;height:64px;border-radius:14px;border:1px solid var(--line);
       background:#f9fafb;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;
     }
-    .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+    .thumb img{
+  width:100%;
+  height:100%;
+  object-fit:contain;   /* 안 잘리게 */
+  background:#fff;     /* 남는 여백 흰색 */
+  display:block;
+}
+
     .thumb .ph{font-size:12px;color:var(--muted);font-weight:900}
 
     /* ✅ 세로로 깨지는 문제 방지: 최소 폭 확보 + 줄바꿈 정책 + 라인클램프 */
