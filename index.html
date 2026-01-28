@@ -59,24 +59,41 @@
     .products{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
     @media (max-width:860px){.products{grid-template-columns:repeat(2,1fr)}}
     @media (max-width:520px){.products{grid-template-columns:1fr}}
-    .product{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:10px;}
-    .productTop{display:flex;gap:12px;align-items:flex-start;}
+
+    .product{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:10px;min-width:0;}
+    .productTop{display:flex;gap:12px;align-items:flex-start;min-width:0;}
     .thumb{
       width:64px;height:64px;border-radius:14px;border:1px solid var(--line);
       background:#f9fafb;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;
     }
     .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
     .thumb .ph{font-size:12px;color:var(--muted);font-weight:900}
-    .productName{margin:0;font-weight:900;font-size:13.5px;letter-spacing:-.1px;}
-    .productMeta{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.4}
-    .price{margin-left:auto;font-weight:900;white-space:nowrap}
+
+    /* ✅ 세로로 깨지는 문제 방지: 최소 폭 확보 + 줄바꿈 정책 + 라인클램프 */
+    .productInfo{flex:1 1 auto;min-width:0;}
+    .productName{
+      margin:0;font-weight:900;font-size:13.5px;letter-spacing:-.1px;
+      word-break:keep-all; overflow-wrap:break-word;
+      display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
+      overflow:hidden;
+    }
+    .productMeta{
+      margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.45;
+      word-break:keep-all; overflow-wrap:break-word;
+      display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
+      overflow:hidden;
+    }
+    .price{margin-left:auto;font-weight:900;white-space:nowrap;flex:0 0 auto;}
     .qty{width:86px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:14px;outline:none;}
     .miniHint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:4px;}
 
     /* cart */
     .cartList{display:flex;flex-direction:column;gap:10px;}
-    .cartItem{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;display:flex;justify-content:space-between;gap:10px;}
-    .cartItem .name{margin:0;font-weight:900;font-size:13px;max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cartItem{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;display:flex;justify-content:space-between;gap:10px;min-width:0;}
+    .cartItem .name{
+      margin:0;font-weight:900;font-size:13px;max-width:360px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;
+    }
     .cartItem .meta{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.35;}
     .mini{display:flex;gap:6px;align-items:center;justify-content:flex-end;}
     .miniBtn{width:30px;height:30px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:900;display:grid;place-items:center;}
@@ -104,7 +121,7 @@
     .modalBody{padding:14px 16px;overflow:auto;flex:1 1 auto;}
     .modalFooter{padding:12px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;align-items:center;gap:10px;background:#fff;flex:0 0 auto;}
     table{width:100%;border-collapse:collapse;font-size:13px;}
-    th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;word-break:keep-all;}
+    th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;word-break:keep-all;overflow-wrap:break-word;}
     th{font-size:12px;color:var(--muted);font-weight:900;}
     .tfoot td{font-weight:900;border-bottom:none;padding-top:12px;}
     .status{font-size:12px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted);white-space:nowrap;}
@@ -232,10 +249,14 @@
               <input type="text" id="ordererName" placeholder="예) 홍길동">
             </div>
             <div>
-              <label>주문자 연락처</label>
+              <label>사번(직원번호) *</label>
+              <input type="text" id="ordererEmpId" placeholder="예) 123456">
+            </div>
+            <div>
+              <label>주문자 연락처 *</label>
               <input type="tel" id="ordererPhone" placeholder="예) 010-1234-5678">
             </div>
-            <div style="grid-column:1 / -1;">
+            <div>
               <label>부서 *</label>
               <input type="text" id="ordererDept" placeholder="예) 영업지원팀">
             </div>
@@ -435,7 +456,7 @@
         <div class="help">주문금액 확인 후 입금 부탁 드립니다.</div>
       </div>
 
-      <!-- ✅ 버튼이 항상 보이도록 footer 고정 -->
+      <!-- 버튼이 항상 보이도록 footer 고정 -->
       <div class="modalFooter">
         <span class="status" id="sendStatus">전송 대기</span>
         <button class="btn" id="copyJsonBtn" style="display:none;">JSON 복사</button>
@@ -448,7 +469,7 @@
     /**********************************************************
      * (숨김) 제출 엔드포인트: 사이트에는 언급/표시 없음
      **********************************************************/
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzm2Yjy6K5hj8o79IL-_YTgMyD7VTi9VO0JJEfhOzo42rHOhOhTAMpeOPO5chpggPLW/exec"; // 여기에 Apps Script Web App URL 넣기 (비워두면 콘솔에만 기록)
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzm2Yjy6K5hj8o79IL-_YTgMyD7VTi9VO0JJEfhOzo42rHOhOhTAMpeOPO5chpggPLW/exec";
 
     /**********************************************************
      * 배송비 정책 (우편번호 기준)
@@ -457,45 +478,38 @@
     const SHIPPING_JEJU_FEE = 3000;     // 제주 3천원
     const SHIPPING_ISLAND_FEE = 5000;   // 도서산간 5천원
 
-    // 네가 준 기준 그대로
     const ZIP_RULES = [
       { type: "jeju", ranges: [[63000, 63644]] },
       { type: "island", ranges: [
-        [22386, 22388], // 인천 중구 섬지역
-        [23004, 23010], // 인천 강화 섬지역
-        [23100, 23116], // 인천 옹진 1
-        [23124, 23136], // 인천 옹진 2
-
-        [31708, 31708], // 충남 당진
-        [32133, 32133], // 충남 태안
-        [33411, 33411], // 충남 보령
-
-        [40200, 40240], // 경북 울릉도
-        [46768, 46771], // 부산 강서구 섬
-        [52570, 52571], // 경남 사천
-        [53031, 53033], // 경남 통영 1
-        [53089, 53104], // 경남 통영 2
-        [54000, 54000], // 경남 통영 3 (제공값 그대로)
-
-        [56347, 56349], // 전북 부안
-        [57068, 57069], // 전남 영광
-        [58760, 58762], // 전남 목포
-
-        [58800, 58810], // 전남 신안 1
-        [58816, 58818], // 전남 신안 2
-        [28826, 28826], // 전남 신안 3 (제공값 그대로)
-        [58828, 58866], // 전남 신안 4
-
-        [58953, 58958], // 전남 진도
-        [59102, 59103], // 전남 완도 1
-        [59106, 59106], // 전남 완도 2
-        [59127, 59127], // 전남 완도 3
-        [59129, 59129], // 전남 완도 4
-        [59137, 59166], // 전남 완도 5
-
-        [59650, 59650], // 전남 여수 1
-        [59766, 59766], // 전남 여수 2
-        [59781, 59790], // 전남 여수 3
+        [22386, 22388],
+        [23004, 23010],
+        [23100, 23116],
+        [23124, 23136],
+        [31708, 31708],
+        [32133, 32133],
+        [33411, 33411],
+        [40200, 40240],
+        [46768, 46771],
+        [52570, 52571],
+        [53031, 53033],
+        [53089, 53104],
+        [54000, 54000],
+        [56347, 56349],
+        [57068, 57069],
+        [58760, 58762],
+        [58800, 58810],
+        [58816, 58818],
+        [28826, 28826],
+        [58828, 58866],
+        [58953, 58958],
+        [59102, 59103],
+        [59106, 59106],
+        [59127, 59127],
+        [59129, 59129],
+        [59137, 59166],
+        [59650, 59650],
+        [59766, 59766],
+        [59781, 59790],
       ]},
     ];
 
@@ -527,30 +541,48 @@
     }
 
     /**********************************************************
-     * 데이터
+     * 데이터 (✅ 카테고리 4개 / 각 6개 샘플)
      **********************************************************/
     const CATEGORIES = [
-      { key: "면도용품", label: "면도용품" },
+      { key: "면도(휴대용)", label: "면도(휴대용)" },
+      { key: "면도(시스템)", label: "면도(시스템)" },
       { key: "주방용품", label: "주방용품" },
-      { key: "커터기", label: "커터기" },
+      { key: "쿡웨어", label: "쿡웨어" },
     ];
 
-    // 이미지 추가하고 싶으면 image: "https://..." 넣으면 됨.
-    // 로컬 이미지면 같은 폴더에 두고 "images/xxx.png" 처럼 경로 넣으면 됨.
+    // image: "https://..." 넣으면 이미지 표시됨. (로컬이면 같은 repo에 두고 경로 지정)
     const PRODUCTS = [
-      { id: "RZ-01", category: "면도용품", name: "면도기 핸들", price: 3500, desc: "기본 핸들 1EA", detail: "호환 리필 사용 가능", image: "" },
-      { id: "RZ-02", category: "면도용품", name: "면도날 4입", price: 4200, desc: "리필 4EA", detail: "정품 리필", image: "" },
-      { id: "RZ-03", category: "면도용품", name: "쉐이빙 폼", price: 5800, desc: "폼 1EA", detail: "부드러운 사용감", image: "" },
-      { id: "RZ-04", category: "면도용품", name: "애프터쉐이브 로션", price: 8900, desc: "로션 1EA", detail: "면도 후 진정", image: "" },
+      // 면도(휴대용) 6
+      { id:"PR-01", category:"면도(휴대용)", name:"휴대용 면도기 세트(파우치)", price:6900, desc:"휴대용 구성", detail:"파우치 포함 / 출장용", image:"" },
+      { id:"PR-02", category:"면도(휴대용)", name:"미니 쉐이빙 젤", price:3200, desc:"50ml", detail:"간편 세정", image:"" },
+      { id:"PR-03", category:"면도(휴대용)", name:"면도날 트래블 2입", price:2800, desc:"리필 2EA", detail:"휴대형", image:"" },
+      { id:"PR-04", category:"면도(휴대용)", name:"휴대용 애프터샤워 로션", price:4100, desc:"60ml", detail:"사용감 산뜻", image:"" },
+      { id:"PR-05", category:"면도(휴대용)", name:"트래블 면도기 캡", price:1200, desc:"보관용 캡", detail:"위생 보관", image:"" },
+      { id:"PR-06", category:"면도(휴대용)", name:"휴대용 일회용 면도기 5입", price:3500, desc:"5EA", detail:"비상용", image:"" },
 
-      { id: "KT-01", category: "주방용품", name: "주방세제", price: 4200, desc: "세제 1EA", detail: "기름때 제거", image: "" },
-      { id: "KT-02", category: "주방용품", name: "수세미 3입", price: 3000, desc: "수세미 3EA", detail: "교체용", image: "" },
-      { id: "KT-03", category: "주방용품", name: "키친타월 2롤", price: 4500, desc: "키친타월 2ROLL", detail: "흡수력 우수", image: "" },
-      { id: "KT-04", category: "주방용품", name: "고무장갑", price: 2900, desc: "장갑 1SET", detail: "S/M/L 별도 운영 가능", image: "" },
+      // 면도(시스템) 6
+      { id:"SR-01", category:"면도(시스템)", name:"시스템 면도기 핸들", price:3500, desc:"핸들 1EA", detail:"정품 리필 호환", image:"" },
+      { id:"SR-02", category:"면도(시스템)", name:"시스템 면도날 4입", price:4200, desc:"리필 4EA", detail:"정품 리필", image:"" },
+      { id:"SR-03", category:"면도(시스템)", name:"프리미엄 면도날 6입", price:7800, desc:"리필 6EA", detail:"부드러운 절삭", image:"" },
+      { id:"SR-04", category:"면도(시스템)", name:"쉐이빙 폼", price:5800, desc:"폼 1EA", detail:"풍성 거품", image:"" },
+      { id:"SR-05", category:"면도(시스템)", name:"애프터쉐이브 로션", price:8900, desc:"로션 1EA", detail:"면도 후 진정", image:"" },
+      { id:"SR-06", category:"면도(시스템)", name:"면도날 보관 스탠드", price:2600, desc:"스탠드 1EA", detail:"건조/보관", image:"" },
 
-      { id: "CT-01", category: "커터기", name: "커터기 본체", price: 5200, desc: "본체 1EA", detail: "기본형", image: "" },
-      { id: "CT-02", category: "커터기", name: "커터날 10입", price: 3300, desc: "리필 10EA", detail: "교체식", image: "" },
-      { id: "CT-03", category: "커터기", name: "안전 커터", price: 7900, desc: "안전형 1EA", detail: "안전커버 포함", image: "" },
+      // 주방용품 6
+      { id:"KT-01", category:"주방용품", name:"주방세제", price:4200, desc:"세제 1EA", detail:"기름때 제거", image:"" },
+      { id:"KT-02", category:"주방용품", name:"수세미 3입", price:3000, desc:"수세미 3EA", detail:"교체용", image:"" },
+      { id:"KT-03", category:"주방용품", name:"키친타월 2롤", price:4500, desc:"2ROLL", detail:"흡수력 우수", image:"" },
+      { id:"KT-04", category:"주방용품", name:"고무장갑", price:2900, desc:"1SET", detail:"사이즈 옵션 가능", image:"" },
+      { id:"KT-05", category:"주방용품", name:"지퍼백(중) 20매", price:2400, desc:"20EA", detail:"보관/소분", image:"" },
+      { id:"KT-06", category:"주방용품", name:"랩(소) 30m", price:3600, desc:"30m", detail:"데일리 사용", image:"" },
+
+      // 쿡웨어 6
+      { id:"CW-01", category:"쿡웨어", name:"프라이팬 24cm", price:17900, desc:"1EA", detail:"논스틱 코팅", image:"" },
+      { id:"CW-02", category:"쿡웨어", name:"프라이팬 28cm", price:21900, desc:"1EA", detail:"대용량", image:"" },
+      { id:"CW-03", category:"쿡웨어", name:"양수냄비 20cm", price:23900, desc:"1EA", detail:"국/찌개용", image:"" },
+      { id:"CW-04", category:"쿡웨어", name:"궁중팬 28cm", price:25900, desc:"1EA", detail:"볶음/튀김용", image:"" },
+      { id:"CW-05", category:"쿡웨어", name:"실리콘 조리도구 3종", price:9900, desc:"3EA", detail:"스크래치 방지", image:"" },
+      { id:"CW-06", category:"쿡웨어", name:"유리뚜껑 24cm", price:6900, desc:"1EA", detail:"호환 뚜껑", image:"" },
     ];
 
     const state = {
@@ -589,8 +621,13 @@
       // step1: cart required
       el("toStep2").disabled = !(state.cart.size > 0);
 
-      // step2: orderer required
-      const ordererOk = el("ordererName").value.trim() && el("ordererDept").value.trim();
+      // step2: orderer required (✅ 전화번호 필수 + 사번 필수)
+      const ordererOk =
+        el("ordererName").value.trim() &&
+        el("ordererEmpId").value.trim() &&
+        el("ordererPhone").value.trim() &&
+        el("ordererDept").value.trim();
+
       el("toStep3").disabled = !(state.cart.size > 0 && ordererOk);
 
       // step3: recipient/address required
@@ -647,8 +684,8 @@
           thumb.appendChild(ph);
         }
 
-        const left = document.createElement("div");
-        left.style.minWidth = "0";
+        const info = document.createElement("div");
+        info.className = "productInfo";
 
         const name = document.createElement("p");
         name.className = "productName";
@@ -659,15 +696,15 @@
         const detail = p.detail ? ` · ${p.detail}` : "";
         meta.textContent = `${p.id} · ${p.desc}${detail}`;
 
-        left.appendChild(name);
-        left.appendChild(meta);
+        info.appendChild(name);
+        info.appendChild(meta);
 
         const price = document.createElement("div");
         price.className = "price";
         price.textContent = `${fmt(p.price)}원`;
 
         top.appendChild(thumb);
-        top.appendChild(left);
+        top.appendChild(info);
         top.appendChild(price);
 
         const row = document.createElement("div");
@@ -843,7 +880,7 @@
       });
     }
 
-    /* 주소검색: 팝업 대신 embed (반응없음 이슈 회피) */
+    /* 주소검색: 팝업 대신 embed */
     function openAddressSearchEmbed(){
       const help = el("addrHelp");
       help.textContent = "";
@@ -865,9 +902,7 @@
           layer.classList.remove("open");
           el("addr2").focus();
 
-          // ✅ 우편번호 기준 배송비 계산
           recalcShipping();
-
           validateStepButtons();
         },
         onresize: function(size){
@@ -898,6 +933,7 @@
         created_at: now.toISOString(),
         orderer: {
           name: el("ordererName").value.trim(),
+          emp_id: el("ordererEmpId").value.trim(),
           phone: el("ordererPhone").value.trim(),
           dept: el("ordererDept").value.trim()
         },
@@ -927,6 +963,7 @@
         ["주문번호", payload.order_id],
         ["요청일시", new Date(payload.created_at).toLocaleString("ko-KR")],
         ["주문자", `${payload.orderer.name} (${payload.orderer.dept})`],
+        ["사번", payload.orderer.emp_id || "-"],
         ["주문자 연락처", payload.orderer.phone || "-"],
         ["수령자", payload.recipient.name],
         ["수령자 연락처", payload.recipient.phone],
@@ -961,8 +998,6 @@
       el("sendStatus").className = "status";
       el("sendStatus").textContent = "전송 대기";
 
-      // JSON 복사는 숨김(원하면 display:block으로 바꿔)
-      // el("copyJsonBtn").style.display = "inline-flex";
       el("copyJsonBtn").onclick = async ()=>{
         try{
           await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
@@ -1072,9 +1107,11 @@
       el("clearCartBtn").onclick = clearCart;
 
       // Form input validation
-      ["ordererName","ordererPhone","ordererDept","recvName","recvPhone","zip","addr1","addr2","note"].forEach(id=>{
+      [
+        "ordererName","ordererEmpId","ordererPhone","ordererDept",
+        "recvName","recvPhone","zip","addr1","addr2","note"
+      ].forEach(id=>{
         el(id).addEventListener("input", ()=>{
-          // zip 수동변경은 readonly지만, 혹시 값 들어오면 배송비 재계산
           if(id==="zip") recalcShipping();
           validateStepButtons();
         });
