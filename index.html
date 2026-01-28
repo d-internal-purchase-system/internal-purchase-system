@@ -56,12 +56,25 @@
     .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 10px;font-size:13px;cursor:pointer;}
     .tab.active{background:#111827;border-color:#111827;color:#fff;}
 
-    .products{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-    @media (max-width:860px){.products{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:520px){.products{grid-template-columns:1fr}}
+    /* products */
+.products{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap:10px;
+}
+@media (max-width:520px){
+  .products{ grid-template-columns: 1fr; }
+}
+
 
     .product{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:10px;min-width:0;}
-    .productTop{display:flex;gap:12px;align-items:flex-start;min-width:0;}
+.productTop{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  min-width:0;
+  flex-wrap:wrap; /* 좁아지면 줄바꿈 */
+}
     .thumb{
       width:64px;height:64px;border-radius:14px;border:1px solid var(--line);
       background:#f9fafb;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;
@@ -83,7 +96,21 @@
       display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
       overflow:hidden;
     }
-    .price{margin-left:auto;font-weight:900;white-space:nowrap;flex:0 0 auto;}
+.price{
+  margin-left:auto;
+  font-weight:900;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+
+/* 카드가 좁아질 때 가격을 아래줄로 내려 공간 확보 */
+@media (max-width:860px){
+  .price{
+    width:100%;
+    text-align:right;
+    margin-left:0;
+  }
+}
     .qty{width:86px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:14px;outline:none;}
     .miniHint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:4px;}
 
