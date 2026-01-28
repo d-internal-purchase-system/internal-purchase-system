@@ -56,9 +56,13 @@
     .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
     .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 10px;font-size:13px;cursor:pointer;}
     .tab.active{background:#111827;border-color:#111827;color:#fff;}
-    .products{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-    @media (max-width:860px){.products{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:520px){.products{grid-template-columns:1fr}}
+
+    /* ✅ FIX: auto-fit + min width to avoid vertical text */
+    .products{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap:10px;
+    }
 
     .product{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;background:#fff;}
     .productTop{display:flex;gap:10px;align-items:flex-start;}
@@ -68,9 +72,23 @@
       overflow:hidden; flex:0 0 auto;
     }
     .productImg img{width:100%;height:100%;object-fit:cover;display:block;}
-    .productName{margin:0;font-weight:900;font-size:13.5px;letter-spacing:-.1px;}
-    .productMeta{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.45}
-    .price{font-weight:900;white-space:nowrap}
+    .productName{
+      margin:0;font-weight:900;font-size:13.5px;letter-spacing:-.1px;
+      word-break:keep-all;
+    }
+    /* ✅ FIX: clamp + keep-all */
+    .productMeta{
+      margin:6px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.45;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      word-break:keep-all;
+    }
+    .price{font-weight:900;white-space:nowrap;flex:0 0 auto;}
     .qty{width:82px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:14px;outline:none;}
     .subActions{display:flex;gap:8px;flex-wrap:wrap;}
 
@@ -99,10 +117,25 @@
     /* modal */
     .backdrop{position:fixed;inset:0;background:rgba(17,24,39,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;}
     .backdrop.open{display:flex;}
-    .modal{width:min(860px,100%);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 50px rgba(17,24,39,.18);overflow:hidden;}
-    .modalHeader{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+
+    /* ✅ FIX: limit modal height */
+    .modal{
+      width:min(860px,100%);
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      box-shadow:0 18px 50px rgba(17,24,39,.18);
+      overflow:hidden;
+      max-height: min(86vh, 760px);
+      display:flex;
+      flex-direction:column;
+    }
+    .modalHeader{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex:0 0 auto;}
     .modalHeader h3{margin:0;font-size:15px;letter-spacing:-.1px;}
-    .modalBody{padding:14px 16px;}
+
+    /* ✅ FIX: scrollable body so footer buttons stay visible */
+    .modalBody{padding:14px 16px;overflow:auto;flex:1 1 auto;}
+
     table{width:100%;border-collapse:collapse;font-size:13px;}
     th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;}
     th{font-size:12px;color:var(--muted);font-weight:900;}
@@ -110,6 +143,20 @@
     .status{font-size:12px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted);white-space:nowrap;}
     .status.ok{border-color:#bbf7d0;color:var(--ok);background:#f0fdf4;}
     .status.err{border-color:#fecaca;color:var(--danger);background:#fff1f2;}
+
+    /* ✅ FIX: sticky footer in summary modal */
+    .summaryFooter{
+      position:sticky;
+      bottom:0;
+      background:#fff;
+      border-top:1px solid var(--line);
+      padding:10px 0 0;
+      margin-top:10px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      align-items:center;
+    }
 
     /* gate */
     .policy{font-size:12px;line-height:1.6;background:#f9fafb;border:1px solid var(--line);border-radius:12px;padding:12px;max-height:260px;overflow:auto;}
@@ -119,9 +166,7 @@
     .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
 
     /* address search layer (embed) */
-    .addrLayer{
-      display:none;border:1px solid var(--line);border-radius:12px;overflow:hidden;height:420px;background:#fff;margin-top:10px;
-    }
+    .addrLayer{display:none;border:1px solid var(--line);border-radius:12px;overflow:hidden;height:420px;background:#fff;margin-top:10px;}
     .addrLayer.open{display:block;}
 
     /* product detail modal */
@@ -177,7 +222,7 @@
               <div class="products" id="products"></div>
             </div>
 
-            <!-- right: cart preview (NEW) -->
+            <!-- right: cart preview -->
             <div class="sticky">
               <div class="card" style="box-shadow:none;">
                 <div class="cardHeader">
@@ -306,7 +351,7 @@
 
           <div class="divider"></div>
 
-          <!-- NEW: payment account info -->
+          <!-- payment account info -->
           <div class="card" style="box-shadow:none;">
             <div class="cardHeader">
               <div>
@@ -316,10 +361,7 @@
               <span class="status">안내</span>
             </div>
             <div class="cardBody">
-              <div class="kbd" id="payInfoBox">은행: [은행명]
-예금주: [예금주]
-계좌번호: [계좌번호]
-입금기한/메모: [필요 시 기재]</div>
+              <div class="kbd" id="payInfoBox"></div>
               <div class="help" style="margin-top:8px;">
                 * 사내 운영 방식에 따라 “승인 후 입금” 또는 “입금 후 승인” 등 문구를 조정하세요.
               </div>
@@ -349,7 +391,7 @@
 
   <!-- Gate (동의) -->
   <div class="backdrop open" id="gateBackdrop" aria-hidden="false">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gateTitle" style="max-height:min(86vh,760px);">
       <div class="modalHeader">
         <h3 id="gateTitle">주문 전 필수 안내</h3>
         <span class="status err">동의 필요</span>
@@ -424,7 +466,8 @@
           </div>
         </div>
 
-        <div class="row" style="justify-content:flex-end;margin-top:10px;">
+        <!-- ✅ FIX: sticky footer so buttons are always visible -->
+        <div class="summaryFooter">
           <span class="status" id="sendStatus">전송 대기</span>
           <button class="btn" id="copyJsonBtn">JSON 복사</button>
           <button class="btn primary" id="confirmSendBtn">최종 제출</button>
@@ -435,7 +478,7 @@
     </div>
   </div>
 
-  <!-- Product Detail Modal (NEW) -->
+  <!-- Product Detail Modal -->
   <div class="backdrop" id="pdBackdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pdTitle">
       <div class="modalHeader">
@@ -475,8 +518,7 @@
     const WEB_APP_URL = ""; // 비워두면 콘솔에만 기록
 
     /**********************************************************
-     * (NEW) 입금 안내 문구(계좌번호는 placeholder)
-     * - 여기 문자열만 수정하면 Step4/요약에 자동 반영
+     * 입금 안내 문구(계좌번호는 placeholder)
      **********************************************************/
     const PAYMENT_INFO_TEXT = `은행: [은행명]
 예금주: [예금주]
@@ -490,9 +532,7 @@
     ];
 
     /**********************************************************
-     * (UPDATED) 상품: image / detail 추가
-     * - image: 내부/사내 서버 URL 또는 상대경로 가능
-     * - 현재는 비워두면 카드에 플레이스홀더가 뜸
+     * 상품: image / detail 추가
      **********************************************************/
     const PRODUCTS = [
       { id: "RZ-01", category: "면도용품", name: "면도기 핸들", price: 3500, desc: "기본 핸들 1EA",
@@ -554,18 +594,12 @@
     }
 
     function validateStepButtons(){
-      // step1: cart required
       el("toStep2").disabled = !(state.cart.size > 0);
-
-      // step2: orderer required
       const ordererOk = el("ordererName").value.trim() && el("ordererDept").value.trim();
       el("toStep3").disabled = !(state.cart.size > 0 && ordererOk);
-
-      // step3: recipient/address required
       const recvOk = el("recvName").value.trim() && el("recvPhone").value.trim();
       const addrOk = el("zip").value.trim() && el("addr1").value.trim() && el("addr2").value.trim();
       el("toStep4").disabled = !(state.cart.size > 0 && ordererOk && recvOk && addrOk);
-
       el("clearCartBtn").disabled = !(state.cart.size > 0);
     }
 
@@ -617,6 +651,7 @@
 
         const left = document.createElement("div");
         left.style.flex = "1 1 auto";
+        left.style.minWidth = "0";
 
         const name = document.createElement("p");
         name.className = "productName";
@@ -624,7 +659,8 @@
 
         const meta = document.createElement("p");
         meta.className = "productMeta";
-        meta.textContent = `${p.id} · ${p.desc}${p.detail ? " · " + p.detail : ""}`;
+        /* ✅ FIX: card meta does NOT include long detail */
+        meta.textContent = `${p.id} · ${p.desc}`;
 
         left.appendChild(name);
         left.appendChild(meta);
@@ -636,9 +672,6 @@
         top.appendChild(img);
         top.appendChild(left);
         top.appendChild(price);
-
-        const row = document.createElement("div");
-        row.className = "row";
 
         const qty = document.createElement("input");
         qty.type="number"; qty.min="1"; qty.step="1"; qty.value="1"; qty.className="qty";
@@ -791,13 +824,12 @@
     }
 
     function renderCartEverywhere(){
-      renderCartPreviewStep1();   // NEW
+      renderCartPreviewStep1();
       renderCartForStep4();
       renderTotals();
       validateStepButtons();
     }
 
-    /* 주소검색: 팝업 대신 embed (반응없음 이슈 회피) */
     function openAddressSearchEmbed(){
       const help = el("addrHelp");
       help.textContent = "";
@@ -846,7 +878,7 @@
       return {
         order_id: orderId,
         created_at: now.toISOString(),
-        payment_info: PAYMENT_INFO_TEXT, // NEW
+        payment_info: PAYMENT_INFO_TEXT,
         orderer: {
           name: el("ordererName").value.trim(),
           phone: el("ordererPhone").value.trim(),
@@ -883,7 +915,7 @@
         ["수령자 연락처", payload.recipient.phone],
         ["배송지", `(${payload.recipient.address.zip}) ${payload.recipient.address.addr1} ${payload.recipient.address.addr2}`],
         ["출고/배송비", "택배발송 / 0원(무료배송)"],
-        ["입금계좌", payload.payment_info.replaceAll("\n"," / ")], // NEW
+        ["입금계좌", payload.payment_info.replaceAll("\n"," / ")],
         ["비고", payload.note || "-"],
       ];
       rows.forEach(([k,v])=>{
@@ -988,9 +1020,6 @@
       };
     }
 
-    /***********************
-     * Product detail modal
-     ***********************/
     function openProductDetail(productId){
       const p = PRODUCTS.find(x=>x.id===productId);
       if(!p) return;
@@ -1025,8 +1054,6 @@
 
     function init(){
       initGate();
-
-      // payment info box sync
       el("payInfoBox").textContent = PAYMENT_INFO_TEXT;
 
       // Step navigation
