@@ -56,40 +56,36 @@
     .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 10px;font-size:13px;cursor:pointer;}
     .tab.active{background:#111827;border-color:#111827;color:#fff;}
 
-    /* products */
-.products{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap:10px;
-}
-@media (max-width:520px){
-  .products{ grid-template-columns: 1fr; }
-}
-
+    .products{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap:10px;
+    }
+    @media (max-width:520px){
+      .products{ grid-template-columns: 1fr; }
+    }
 
     .product{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:10px;min-width:0;}
-.productTop{
-  display:flex;
-  gap:12px;
-  align-items:flex-start;
-  min-width:0;
-  flex-wrap:wrap; /* 좁아지면 줄바꿈 */
-}
+    .productTop{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      min-width:0;
+      flex-wrap:wrap;
+    }
     .thumb{
       width:90px;height:90px;border-radius:14px;border:1px solid var(--line);
       background:#f9fafb;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;
     }
     .thumb img{
-  width:100%;
-  height:100%;
-  object-fit:contain;   /* 안 잘리게 */
-  background:#fff;     /* 남는 여백 흰색 */
-  display:block;
-}
-
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:#fff;
+      display:block;
+    }
     .thumb .ph{font-size:12px;color:var(--muted);font-weight:900}
 
-    /* ✅ 세로로 깨지는 문제 방지: 최소 폭 확보 + 줄바꿈 정책 + 라인클램프 */
     .productInfo{flex:1 1 auto;min-width:0;}
     .productName{
       margin:0;font-weight:900;font-size:13.5px;letter-spacing:-.1px;
@@ -103,21 +99,19 @@
       display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
       overflow:hidden;
     }
-.price{
-  margin-left:auto;
-  font-weight:900;
-  white-space:nowrap;
-  flex:0 0 auto;
-}
-
-/* 카드가 좁아질 때 가격을 아래줄로 내려 공간 확보 */
-@media (max-width:860px){
-  .price{
-    width:100%;
-    text-align:right;
-    margin-left:0;
-  }
-}
+    .price{
+      margin-left:auto;
+      font-weight:900;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    @media (max-width:860px){
+      .price{
+        width:100%;
+        text-align:right;
+        margin-left:0;
+      }
+    }
     .qty{width:86px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:14px;outline:none;}
     .miniHint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:4px;}
 
@@ -597,32 +591,28 @@
     }
 
     /**********************************************************
-     * 데이터 (✅ 카테고리 4개 / 각 6개 샘플)
+     * 데이터 (✅ 카테고리: 면도기 / 주방용품 / 쿡웨어)
      **********************************************************/
     const CATEGORIES = [
-      { key: "면도(휴대용)", label: "면도(휴대용)" },
-      { key: "면도(시스템)", label: "면도(시스템)" },
+      { key: "면도기", label: "면도기" },
       { key: "주방용품", label: "주방용품" },
       { key: "쿡웨어", label: "쿡웨어" },
     ];
 
-    // image: "https://..." 넣으면 이미지 표시됨. (로컬이면 같은 repo에 두고 경로 지정)
     const PRODUCTS = [
-      // 면도(휴대용) 6
-      { id:"PR-01", category:"면도(휴대용)", name:"터치3 휴대용면도기 2입", price:20000, desc:"", detail:"", image:"PR-01.jpg" },
-      { id:"PR-02", category:"면도(휴대용)", name:"미니 쉐이빙 젤", price:3200, desc:"50ml", detail:"간편 세정", image:"" },
-      { id:"PR-03", category:"면도(휴대용)", name:"면도날 트래블 2입", price:2800, desc:"리필 2EA", detail:"휴대형", image:"" },
-      { id:"PR-04", category:"면도(휴대용)", name:"휴대용 애프터샤워 로션", price:4100, desc:"60ml", detail:"사용감 산뜻", image:"" },
-      { id:"PR-05", category:"면도(휴대용)", name:"트래블 면도기 캡", price:1200, desc:"보관용 캡", detail:"위생 보관", image:"" },
-      { id:"PR-06", category:"면도(휴대용)", name:"휴대용 일회용 면도기 5입", price:3500, desc:"5EA", detail:"비상용", image:"" },
-
-      // 면도(시스템) 6
-      { id:"SR-01", category:"면도(시스템)", name:"시스템 면도기 핸들", price:3500, desc:"핸들 1EA", detail:"정품 리필 호환", image:"" },
-      { id:"SR-02", category:"면도(시스템)", name:"시스템 면도날 4입", price:4200, desc:"리필 4EA", detail:"정품 리필", image:"" },
-      { id:"SR-03", category:"면도(시스템)", name:"프리미엄 면도날 6입", price:7800, desc:"리필 6EA", detail:"부드러운 절삭", image:"" },
-      { id:"SR-04", category:"면도(시스템)", name:"쉐이빙 폼", price:5800, desc:"폼 1EA", detail:"풍성 거품", image:"" },
-      { id:"SR-05", category:"면도(시스템)", name:"애프터쉐이브 로션", price:8900, desc:"로션 1EA", detail:"면도 후 진정", image:"" },
-      { id:"SR-06", category:"면도(시스템)", name:"면도날 보관 스탠드", price:2600, desc:"스탠드 1EA", detail:"건조/보관", image:"" },
+      // 면도기 12 (✅ PR/SR 통합 → RZ)
+      { id:"RZ-01", category:"면도기", name:"터치3 휴대용면도기 2입", price:20000, desc:"", detail:"", image:"PR-01.jpg" },
+      { id:"RZ-02", category:"면도기", name:"미니 쉐이빙 젤", price:3200, desc:"50ml", detail:"간편 세정", image:"" },
+      { id:"RZ-03", category:"면도기", name:"면도날 트래블 2입", price:2800, desc:"리필 2EA", detail:"휴대형", image:"" },
+      { id:"RZ-04", category:"면도기", name:"휴대용 애프터샤워 로션", price:4100, desc:"60ml", detail:"사용감 산뜻", image:"" },
+      { id:"RZ-05", category:"면도기", name:"트래블 면도기 캡", price:1200, desc:"보관용 캡", detail:"위생 보관", image:"" },
+      { id:"RZ-06", category:"면도기", name:"휴대용 일회용 면도기 5입", price:3500, desc:"5EA", detail:"비상용", image:"" },
+      { id:"RZ-07", category:"면도기", name:"시스템 면도기 핸들", price:3500, desc:"핸들 1EA", detail:"정품 리필 호환", image:"" },
+      { id:"RZ-08", category:"면도기", name:"시스템 면도날 4입", price:4200, desc:"리필 4EA", detail:"정품 리필", image:"" },
+      { id:"RZ-09", category:"면도기", name:"프리미엄 면도날 6입", price:7800, desc:"리필 6EA", detail:"부드러운 절삭", image:"" },
+      { id:"RZ-10", category:"면도기", name:"쉐이빙 폼", price:5800, desc:"폼 1EA", detail:"풍성 거품", image:"" },
+      { id:"RZ-11", category:"면도기", name:"애프터쉐이브 로션", price:8900, desc:"로션 1EA", detail:"면도 후 진정", image:"" },
+      { id:"RZ-12", category:"면도기", name:"면도날 보관 스탠드", price:2600, desc:"스탠드 1EA", detail:"건조/보관", image:"" },
 
       // 주방용품 6
       { id:"KT-01", category:"주방용품", name:"주방세제", price:4200, desc:"세제 1EA", detail:"기름때 제거", image:"" },
@@ -674,10 +664,8 @@
     }
 
     function validateStepButtons(){
-      // step1: cart required
       el("toStep2").disabled = !(state.cart.size > 0);
 
-      // step2: orderer required (✅ 전화번호 필수 + 사번 필수)
       const ordererOk =
         el("ordererName").value.trim() &&
         el("ordererEmpId").value.trim() &&
@@ -686,7 +674,6 @@
 
       el("toStep3").disabled = !(state.cart.size > 0 && ordererOk);
 
-      // step3: recipient/address required
       const recvOk = el("recvName").value.trim() && el("recvPhone").value.trim();
       const addrOk = el("zip").value.trim() && el("addr1").value.trim() && el("addr2").value.trim();
       el("toStep4").disabled = !(state.cart.size > 0 && ordererOk && recvOk && addrOk);
@@ -727,16 +714,15 @@
 
         const thumb = document.createElement("div");
         thumb.className = "thumb";
-if (p.image){
-  const img = document.createElement("img");
-  img.src = p.image;
-  img.alt = p.name;
-  img.loading = "lazy";
-  img.style.cursor = "pointer";
 
-  img.onclick = ()=>openImagePreview(p.image, p.name);
-
-  thumb.appendChild(img);
+        if (p.image){
+          const img = document.createElement("img");
+          img.src = p.image;
+          img.alt = p.name;
+          img.loading = "lazy";
+          img.style.cursor = "pointer";
+          img.onclick = ()=>openImagePreview(p.image, p.name);
+          thumb.appendChild(img);
         } else {
           const ph = document.createElement("div");
           ph.className = "ph";
@@ -847,14 +833,12 @@ if (p.image){
       el("itemsTotal2").textContent = `${fmt(itemsTotal)}원`;
       el("grandTotal2").textContent = `${fmt(grandTotal)}원`;
 
-      // shipping lines
       el("shipFeeLine").textContent = `${fmt(state.shipFee)}원`;
       el("shipFeeLine2").textContent = `${fmt(state.shipFee)}원`;
       el("shipFeeNow").textContent = `${fmt(state.shipFee)}원`;
       el("topShipFee").textContent = `${fmt(state.shipFee)}원`;
       el("badgeShipFee").textContent = `${fmt(state.shipFee)}원`;
 
-      // reasons
       const r = state.shipFeeReason ? `(${state.shipFeeReason})` : "";
       el("shipReason").textContent = r ? `※ ${r}` : "";
       el("shipReason2").textContent = r ? `※ ${r}` : "";
@@ -1124,10 +1108,8 @@ if (p.image){
       renderCartForStep4();
       renderCartPreview();
 
-      // 입력 초기화(원하면 주문자/수령자도 초기화 가능)
       el("note").value = "";
 
-      // 배송정보/배송비 초기화
       el("zip").value = "";
       el("addr1").value = "";
       el("addr2").value = "";
@@ -1150,6 +1132,15 @@ if (p.image){
         el("app").style.display = "";
         toast("동의 확인 완료");
       };
+    }
+
+    function openImagePreview(src, title){
+      el("imgPreviewTarget").src = src;
+      el("imgPreviewTitle").textContent = title;
+      el("imgPreview").classList.add("open");
+    }
+    function closeImagePreview(){
+      el("imgPreview").classList.remove("open");
     }
 
     function init(){
@@ -1194,39 +1185,32 @@ if (p.image){
       renderCartPreview();
       renderTotals();
       validateStepButtons();
-      // ✅ 전화번호 자동 하이픈(주문자/수령자)
-["ordererPhone", "recvPhone"].forEach((id) => {
-  el(id).addEventListener("input", (e) => {
-    const digits = e.target.value.replace(/\D/g, "").slice(0, 11); // 최대 11자리
-    if (digits.length <= 3) e.target.value = digits;
-    else if (digits.length <= 7) e.target.value = digits.replace(/(\d{3})(\d+)/, "$1-$2");
-    else e.target.value = digits.replace(/(\d{3})(\d{4})(\d+)/, "$1-$2-$3");
-  });
-});
 
+      // 전화번호 자동 하이픈(주문자/수령자)
+      ["ordererPhone", "recvPhone"].forEach((id) => {
+        el(id).addEventListener("input", (e) => {
+          const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
+          if (digits.length <= 3) e.target.value = digits;
+          else if (digits.length <= 7) e.target.value = digits.replace(/(\d{3})(\d+)/, "$1-$2");
+          else e.target.value = digits.replace(/(\d{3})(\d{4})(\d+)/, "$1-$2-$3");
+        });
+      });
     }
-function openImagePreview(src, title){
-  el("imgPreviewTarget").src = src;
-  el("imgPreviewTitle").textContent = title;
-  el("imgPreview").classList.add("open");
-}
-
-function closeImagePreview(){
-  el("imgPreview").classList.remove("open");
-}
 
     init();
   </script>
+
+  <!-- 이미지 확대 프리뷰 -->
   <div class="backdrop" id="imgPreview">
-  <div class="modal" style="max-width:520px;">
-    <div class="modalHeader">
-      <h3 id="imgPreviewTitle"></h3>
-      <button class="btn" onclick="closeImagePreview()">닫기</button>
-    </div>
-    <div class="modalBody" style="text-align:center;">
-      <img id="imgPreviewTarget" style="max-width:100%;border-radius:12px;">
+    <div class="modal" style="max-width:520px;">
+      <div class="modalHeader">
+        <h3 id="imgPreviewTitle"></h3>
+        <button class="btn" onclick="closeImagePreview()">닫기</button>
+      </div>
+      <div class="modalBody" style="text-align:center;">
+        <img id="imgPreviewTarget" style="max-width:100%;border-radius:12px;">
+      </div>
     </div>
   </div>
-</div>
 </body>
 </html>
