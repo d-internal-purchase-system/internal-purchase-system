@@ -758,15 +758,9 @@ img.onclick = ()=>openImagePreview(
 
         qtyWrap.appendChild(qty);
         qtyWrap.appendChild(btn);
-
-        const hint = document.createElement("div");
-        hint.className = "miniHint";
-        hint.textContent = `담기 후 장바구니에서 수량 조절 가능 (품목별 최대 ${MAX_QTY_PER_ITEM}개)`;
-
         row.appendChild(qtyWrap);
         card.appendChild(top);
         card.appendChild(row);
-        card.appendChild(hint);
         wrap.appendChild(card);
       }
     }
