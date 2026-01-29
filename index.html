@@ -65,18 +65,34 @@
       .products{ grid-template-columns: 1fr; }
     }
 
-    .product{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:10px;min-width:0;}
-.productTop{
-  display:flex;
-  gap:12px;
-  align-items:flex-start;
-  min-width:0;
-  flex-wrap:wrap; /* 중요: price를 다음줄로 보내려면 wrap 필요 */
-}
+    .product{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      background:#fff;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-width:0;
+    }
+
+    /* ✅ 카드 레이아웃 통일: 썸네일(상단) → 제품명 → 품목ID → (칩/설명) → 가격 */
+    .productTop{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:stretch;
+    }
 
     .thumb{
-      width:90px;height:90px;border-radius:14px;border:1px solid var(--line);
-      background:#f9fafb;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;
+      width:100%;
+      height:140px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
     }
     .thumb img{
       width:100%;
@@ -87,19 +103,39 @@
     }
     .thumb .ph{font-size:12px;color:var(--muted);font-weight:900}
 
-    .productInfo{flex:1 1 auto;min-width:0;}
+    .productInfo{min-width:0;}
     .productName{
-      margin:0;font-weight:900;font-size:13.5px;letter-spacing:-.1px;
-      word-break:keep-all; overflow-wrap:break-word;
-      display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
+      margin:0;
+      font-weight:900;
+      font-size:13.5px;
+      letter-spacing:-.1px;
+      line-height:1.25;
+      word-break:keep-all;
+      overflow-wrap:break-word;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
       overflow:hidden;
+    }
+    .productId{
+      margin:4px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
     }
     .productMeta{
-      margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.45;
-      word-break:keep-all; overflow-wrap:break-word;
-      display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
+      margin:8px 0 0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.45;
+      word-break:keep-all;
+      overflow-wrap:break-word;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:3;
       overflow:hidden;
     }
+
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
     .chip{
       display:inline-flex;align-items:center;gap:6px;
@@ -115,20 +151,14 @@
       background:#f9fafb;
     }
 
-.price{
-  width:100%;          /* 한 줄 먹기 */
-  margin-left:0;       /* 기존 auto 제거 */
-  text-align:right;    /* 오른쪽 정렬 */
-  white-space:nowrap;
-  order:3;             /* thumb/info 다음에 오게 */
-}
+    .priceLine{
+      margin-top:6px;
+      display:flex;
+      justify-content:flex-end;
+      font-weight:900;
+      white-space:nowrap;
+    }
 
-@media (max-width:860px){
-  .price{
-    width:auto;
-    text-align:right;
-  }
-}
     .qty{width:86px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:14px;outline:none;}
     .miniHint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:4px;}
 
@@ -692,7 +722,7 @@
     }
 
     function getDiscountChipText(p){
-      // detail에서 "xx% 할인"만 뽑아 표시 (없으면 빈값)
+      // "xx% 할인"만 뽑아 칩 표시 (없으면 빈값)
       const s = `${p.detail || ""} ${p.desc || ""}`.trim();
       const m = s.match(/(\d{1,3})\s*%\s*할인/);
       return m ? `${m[1]}% 할인` : "";
@@ -710,6 +740,7 @@
         const top = document.createElement("div");
         top.className = "productTop";
 
+        // ✅ 썸네일(맨 위)
         const thumb = document.createElement("div");
         thumb.className = "thumb";
 
@@ -719,9 +750,7 @@
           img.alt = p.name;
           img.loading = "lazy";
           img.style.cursor = "pointer";
-          img.onerror = () => {
-            thumb.innerHTML = `<div class="ph">IMG</div>`;
-          };
+          img.onerror = () => { thumb.innerHTML = `<div class="ph">IMG</div>`; };
           img.onclick = ()=>openImagePreview(
             p.image,
             p.name,
@@ -732,6 +761,7 @@
           thumb.innerHTML = `<div class="ph">IMG</div>`;
         }
 
+        // ✅ 제품명 → 품목ID 고정
         const info = document.createElement("div");
         info.className = "productInfo";
 
@@ -739,11 +769,14 @@
         name.className = "productName";
         name.textContent = p.name;
 
-        const meta = document.createElement("p");
-        meta.className = "productMeta";
-        const detail = p.detail ? ` · ${p.detail}` : "";
-        meta.textContent = `${p.id}${detail}`;
+        const pid = document.createElement("p");
+        pid.className = "productId";
+        pid.textContent = p.id;
 
+        info.appendChild(name);
+        info.appendChild(pid);
+
+        // ✅ 할인칩 / 설명(필요 시)
         const chips = document.createElement("div");
         chips.className = "chips";
         const disc = getDiscountChipText(p);
@@ -752,20 +785,27 @@
           c.className = "chip off";
           c.textContent = disc;
           chips.appendChild(c);
+          info.appendChild(chips);
         }
 
-        info.appendChild(name);
-        info.appendChild(meta);
-        if (chips.childNodes.length) info.appendChild(chips);
+        const metaText = [p.desc, p.detail].filter(Boolean).join(" · ").trim();
+        if (metaText){
+          const meta = document.createElement("p");
+          meta.className = "productMeta";
+          meta.textContent = metaText;
+          info.appendChild(meta);
+        }
 
-        const price = document.createElement("div");
-        price.className = "price";
-        price.textContent = `${fmt(p.price)}원`;
+        // ✅ 가격은 항상 아래(고정)
+        const priceLine = document.createElement("div");
+        priceLine.className = "priceLine";
+        priceLine.textContent = `${fmt(p.price)}원`;
 
         top.appendChild(thumb);
         top.appendChild(info);
-        top.appendChild(price);
+        top.appendChild(priceLine);
 
+        // 수량/담기
         const row = document.createElement("div");
         row.className = "row";
         row.style.justifyContent = "space-between";
@@ -798,7 +838,6 @@
 
         qtyWrap.appendChild(qty);
         qtyWrap.appendChild(btn);
-
         row.appendChild(qtyWrap);
 
         card.appendChild(top);
@@ -1292,7 +1331,7 @@
       </div>
       <div class="modalBody" style="text-align:center;">
         <img id="imgPreviewTarget" style="max-width:100%;border-radius:12px;">
-        <div id="imgPreviewText" style="margin-top:10px;text-align:left;font-size:13px;line-height:1.5;color:var(--muted);"></div>
+        <div id="imgPreviewText" style="margin-top:10px;text-align:left;font-size:13px;line-height:1.5;color:var(--muted);white-space:pre-line;"></div>
       </div>
     </div>
   </div>
