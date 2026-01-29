@@ -581,21 +581,21 @@
 
     const PRODUCTS = [
       // 면도기 5
-      { id:"RZ-01", category:"면도기", name:"터치3 휴대용면도기 2입", price:4000, desc:"Touch3 휴대용 면도기 2입 * 20", detail:"표준판매가 대비 88% 할인", image:"RZ-01.jpg" },
-      { id:"RZ-02", category:"면도기", name:"(K7)PACE6 골드기획2호", price:10000, desc:"1) PACE6 면도기(날포함) 1ea 2) PACE6 면도날 4ea PACE시스템 전제품 호환 가능", detail:"표준판매가 대비 90% 할인", image:"RZ-02.jpg" },
-      { id:"RZ-03", category:"면도기", name:"PACE 3D 모션 홈쇼핑기획4호 1+1", price:10000, desc:"리필 2EA", detail:"표준판매가 대비 92% 할인", image:"RZ-03.jpg" },
-      { id:"RZ-04", category:"면도기", name:"EVE 크리미 기획세트 2호 1+1", price:5000, desc:"60ml", detail:"표준판매가 대비 90% 할인", image:"RZ-04.jpg" },
-      { id:"RZ-05", category:"면도기", name:"슬릭모션 온라인 기획세트1호", price:25000, desc:"보관용 캡", detail:"표준판매가 대비 54% 할인", image:"RZ-05.jpg" },
+      { id:"RZ-01", category:"면도기", name:"터치3 휴대용면도기 2입", price:4000, desc:"", detail:"표준판매가 대비 88% 할인", longDesc:"", image:"RZ-01.jpg" },
+      { id:"RZ-02", category:"면도기", name:"(K7)PACE6 골드기획2호", price:10000, desc:"", detail:"표준판매가 대비 90% 할인", longDesc:"", image:"RZ-02.jpg" },
+      { id:"RZ-03", category:"면도기", name:"PACE 3D 모션 홈쇼핑기획4호 1+1", price:10000, desc:"", detail:"표준판매가 대비 92% 할인", longDesc:"", image:"RZ-03.jpg" },
+      { id:"RZ-04", category:"면도기", name:"EVE 크리미 기획세트 2호 1+1", price:5000, desc:"", detail:"표준판매가 대비 90% 할인", longDesc:"", image:"RZ-04.jpg" },
+      { id:"RZ-05", category:"면도기", name:"슬릭모션 온라인 기획세트1호", price:25000, desc:"", detail:"표준판매가 대비 54% 할인", longDesc:"", image:"RZ-05.jpg" },
 
       // 주방용품 4
-      { id:"KT-01", category:"주방용품", name:"인테리어 라임 기획세트 1호", price:25000, desc:"세제 1EA", detail:"표준판매가 대비 74% 할인", image:"KT-01.jpg" },
-      { id:"KT-02", category:"주방용품", name:"뉴클래식 라이트 특판세트 1호 1+1", price:20000, desc:"수세미 3EA", detail:"표준판매가 대비 85% 할인", image:"KT-02.jpg" },
-      { id:"KT-03", category:"주방용품", name:"클래식 키친툴 4종 세트", price:10000, desc:"2ROLL", detail:"표준판매가 대비 79% 할인", image:"KT-03.jpg" },
-      { id:"KT-04", category:"주방용품", name:"클래식 키친툴 3종 세트", price:3000, desc:"1SET", detail:"표준판매가 대비 91% 할인", image:"KT-04.jpg" },
+      { id:"KT-01", category:"주방용품", name:"인테리어 라임 기획세트 1호", price:25000, desc:"", detail:"표준판매가 대비 74% 할인", longDesc:"", image:"KT-01.jpg" },
+      { id:"KT-02", category:"주방용품", name:"뉴클래식 라이트 특판세트 1호 1+1", price:20000, desc:"", detail:"표준판매가 대비 85% 할인", longDesc:"", image:"KT-02.jpg" },
+      { id:"KT-03", category:"주방용품", name:"클래식 키친툴 4종 세트", price:10000, desc:"", detail:"표준판매가 대비 79% 할인", longDesc:"", image:"KT-03.jpg" },
+      { id:"KT-04", category:"주방용품", name:"클래식 키친툴 3종 세트", price:3000, desc:"", detail:"표준판매가 대비 91% 할인", longDesc:"", image:"KT-04.jpg" },
 
       // 쿡웨어 2
-      { id:"CW-01", category:"쿡웨어", name:"포레스타 시즌3 IH 7종세트", price:50000, desc:"1) 포레스타 IH 편수 20cm 1ea 2) 포레스타 IH 프라이팬 28cm 2ea 3) 포레스타 IH 궁중팬 26cm 1ea 4) 포레스타 IH  전골팬 26cm 1ea 5) 유리뚜껑 20cm 1ea 6) 유리뚜껑 26cm 1ea 7) 증정품 귀리쌀 (포장일 2023년)", detail:"표준판매가 대비 69% 할인", image:"CW-01.jpg" },
-      { id:"CW-02", category:"쿡웨어", name:"애쉬블루 IH 프라이팬 2종 세트 1호", price:10000, desc:"24cm 1ea 28cm 1ea", detail:"표준판매가 대비 83% 할인", image:"CW-02.jpg" },
+      { id:"CW-01", category:"쿡웨어", name:"포레스타 시즌3 IH 7종세트", price:50000, desc:"", detail:"표준판매가 대비 69% 할인", longDesc:"", image:"CW-01.jpg" },
+      { id:"CW-02", category:"쿡웨어", name:"애쉬블루 IH 프라이팬 2종 세트 1호", price:10000, desc:"", detail:"표준판매가 대비 83% 할인", longDesc:"", image:"CW-02.jpg" },
     ];
 
     const state = {
@@ -688,7 +688,12 @@
           img.alt = p.name;
           img.loading = "lazy";
           img.style.cursor = "pointer";
-          img.onclick = ()=>openImagePreview(p.image, p.name);
+img.onclick = ()=>openImagePreview(
+  p.image,
+  p.name,
+  (p.longDesc || p.detail || p.desc || "").trim()
+);
+
           thumb.appendChild(img);
         } else {
           const ph = document.createElement("div");
@@ -1132,11 +1137,14 @@
       };
     }
 
-    function openImagePreview(src, title){
-      el("imgPreviewTarget").src = src;
-      el("imgPreviewTitle").textContent = title;
-      el("imgPreview").classList.add("open");
-    }
+function openImagePreview(src, title, text){
+  el("imgPreviewTarget").src = src;
+  el("imgPreviewTitle").textContent = title;
+  el("imgPreviewText").textContent = text || "";
+  el("imgPreviewText").style.display = (text && text.trim()) ? "" : "none";
+  el("imgPreview").classList.add("open");
+}
+
     function closeImagePreview(){
       el("imgPreview").classList.remove("open");
     }
