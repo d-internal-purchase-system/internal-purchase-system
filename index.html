@@ -727,12 +727,16 @@
 
         const thumb = document.createElement("div");
         thumb.className = "thumb";
-        if (p.image){
-          const img = document.createElement("img");
-          img.src = p.image;
-          img.alt = p.name;
-          img.loading = "lazy";
-          thumb.appendChild(img);
+if (p.image){
+  const img = document.createElement("img");
+  img.src = p.image;
+  img.alt = p.name;
+  img.loading = "lazy";
+  img.style.cursor = "pointer";
+
+  img.onclick = ()=>openImagePreview(p.image, p.name);
+
+  thumb.appendChild(img);
         } else {
           const ph = document.createElement("div");
           ph.className = "ph";
