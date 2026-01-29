@@ -84,23 +84,25 @@
       align-items:stretch;
     }
 
-    .thumb{
-      width:100%;
-      height:140px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:#f9fafb;
-      display:grid;
-      place-items:center;
-      overflow:hidden;
-    }
-    .thumb img{
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      background:#fff;
-      display:block;
-    }
+.thumb{
+  width:100%;
+  height:140px;                 /* 필요하면 150~170으로 올려도 됨 */
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:#f9fafb;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  padding:10px;                 /* ✅ 여백 추가 (잘린 느낌 제거 핵심) */
+}
+
+.thumb img{
+  width:100%;
+  height:100%;
+  object-fit:contain;           /* ✅ 절대 cover 쓰지 않기 */
+  background:transparent;       /* 기존 #fff면 가장자리 더 꽉 차 보일 수 있음 */
+  display:block;
+}
     .thumb .ph{font-size:12px;color:var(--muted);font-weight:900}
 
     .productInfo{min-width:0;}
