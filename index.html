@@ -1205,8 +1205,28 @@ if (p.image){
 });
 
     }
+function openImagePreview(src, title){
+  el("imgPreviewTarget").src = src;
+  el("imgPreviewTitle").textContent = title;
+  el("imgPreview").classList.add("open");
+}
+
+function closeImagePreview(){
+  el("imgPreview").classList.remove("open");
+}
 
     init();
   </script>
+  <div class="backdrop" id="imgPreview">
+  <div class="modal" style="max-width:520px;">
+    <div class="modalHeader">
+      <h3 id="imgPreviewTitle"></h3>
+      <button class="btn" onclick="closeImagePreview()">닫기</button>
+    </div>
+    <div class="modalBody" style="text-align:center;">
+      <img id="imgPreviewTarget" style="max-width:100%;border-radius:12px;">
+    </div>
+  </div>
+</div>
 </body>
 </html>
