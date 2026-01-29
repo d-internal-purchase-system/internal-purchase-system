@@ -506,7 +506,6 @@
         <div class="help">주문금액 확인 후 입금 부탁 드립니다.</div>
       </div>
 
-      <!-- 버튼이 항상 보이도록 footer 고정 -->
       <div class="modalFooter">
         <span class="status" id="sendStatus">전송 대기</span>
         <button class="btn" id="copyJsonBtn" style="display:none;">JSON 복사</button>
@@ -522,43 +521,24 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzm2Yjy6K5hj8o79IL-_YTgMyD7VTi9VO0JJEfhOzo42rHOhOhTAMpeOPO5chpggPLW/exec";
 
     /**********************************************************
+     * ✅ 품목별 최대 주문 수량
+     **********************************************************/
+    const MAX_QTY_PER_ITEM = 10;
+
+    /**********************************************************
      * 배송비 정책 (우편번호 기준)
      **********************************************************/
     const SHIPPING_BASE_FEE = 0;
-    const SHIPPING_JEJU_FEE = 3000;     // 제주 3천원
-    const SHIPPING_ISLAND_FEE = 5000;   // 도서산간 5천원
+    const SHIPPING_JEJU_FEE = 3000;
+    const SHIPPING_ISLAND_FEE = 5000;
 
     const ZIP_RULES = [
       { type: "jeju", ranges: [[63000, 63644]] },
       { type: "island", ranges: [
-        [22386, 22388],
-        [23004, 23010],
-        [23100, 23116],
-        [23124, 23136],
-        [31708, 31708],
-        [32133, 32133],
-        [33411, 33411],
-        [40200, 40240],
-        [46768, 46771],
-        [52570, 52571],
-        [53031, 53033],
-        [53089, 53104],
-        [54000, 54000],
-        [56347, 56349],
-        [57068, 57069],
-        [58760, 58762],
-        [58800, 58810],
-        [58816, 58818],
-        [28826, 28826],
-        [58828, 58866],
-        [58953, 58958],
-        [59102, 59103],
-        [59106, 59106],
-        [59127, 59127],
-        [59129, 59129],
-        [59137, 59166],
-        [59650, 59650],
-        [59766, 59766],
+        [22386, 22388],[23004, 23010],[23100, 23116],[23124, 23136],[31708, 31708],[32133, 32133],[33411, 33411],
+        [40200, 40240],[46768, 46771],[52570, 52571],[53031, 53033],[53089, 53104],[54000, 54000],[56347, 56349],
+        [57068, 57069],[58760, 58762],[58800, 58810],[58816, 58818],[28826, 28826],[58828, 58866],[58953, 58958],
+        [59102, 59103],[59106, 59106],[59127, 59127],[59129, 59129],[59137, 59166],[59650, 59650],[59766, 59766],
         [59781, 59790],
       ]},
     ];
@@ -755,13 +735,27 @@
         qtyWrap.className = "row";
 
         const qty = document.createElement("input");
-        qty.type="number"; qty.min="1"; qty.step="1"; qty.value="1"; qty.className="qty";
+        qty.type="number";
+        qty.min="1";
+        qty.max=String(MAX_QTY_PER_ITEM);  /* ✅ 최대 10개 입력 제한 */
+        qty.step="1";
+        qty.value="1";
+        qty.className="qty";
 
         const btn = document.createElement("button");
         btn.className="btn primary"; btn.textContent="담기";
         btn.onclick = ()=>{
-          const q = Math.max(1, parseInt(qty.value||"1",10));
-          addToCart(p.id, q);
+          const desired = Math.max(1, Math.min(MAX_QTY_PER_ITEM, parseInt(qty.value||"1",10)));
+
+          const curQty = state.cart.get(p.id)?.qty || 0;
+          const addable = Math.max(0, MAX_QTY_PER_ITEM - curQty);
+
+          if(addable === 0){
+            toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
+            return;
+          }
+
+          addToCart(p.id, Math.min(desired, addable));
         };
 
         qtyWrap.appendChild(qty);
@@ -769,7 +763,7 @@
 
         const hint = document.createElement("div");
         hint.className = "miniHint";
-        hint.textContent = "담기 후 장바구니에서 수량 조절 가능";
+        hint.textContent = `담기 후 장바구니에서 수량 조절 가능 (품목별 최대 ${MAX_QTY_PER_ITEM}개)`;
 
         row.appendChild(qtyWrap);
         card.appendChild(top);
@@ -782,26 +776,44 @@
     function addToCart(productId, qty){
       const product = PRODUCTS.find(x=>x.id===productId);
       if(!product) return;
-      if(state.cart.has(productId)){
-        const cur = state.cart.get(productId);
-        cur.qty += qty;
-        state.cart.set(productId, cur);
-      }else{
-        state.cart.set(productId, {product, qty});
+
+      const curQty = state.cart.get(productId)?.qty || 0;
+      const nextQty = Math.min(MAX_QTY_PER_ITEM, curQty + qty);
+
+      if(nextQty === curQty){
+        toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
+        return;
       }
+
+      state.cart.set(productId, {product, qty: nextQty});
+
+      if(curQty + qty > MAX_QTY_PER_ITEM){
+        toast(`최대 ${MAX_QTY_PER_ITEM}개까지만 담겼습니다`);
+      }else{
+        toast("장바구니에 담았습니다");
+      }
+
       renderCartForStep4();
       renderCartPreview();
       renderTotals();
       validateStepButtons();
-      toast("장바구니에 담았습니다");
     }
 
     function changeQty(productId, delta){
       if(!state.cart.has(productId)) return;
       const cur = state.cart.get(productId);
+
       cur.qty += delta;
+
+      /* ✅ 최대 10개 제한 */
+      if(cur.qty > MAX_QTY_PER_ITEM){
+        cur.qty = MAX_QTY_PER_ITEM;
+        toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
+      }
+
       if(cur.qty<=0) state.cart.delete(productId);
       else state.cart.set(productId, cur);
+
       renderCartForStep4();
       renderCartPreview();
       renderTotals();
@@ -918,7 +930,6 @@
       });
     }
 
-    /* 주소검색: 팝업 대신 embed */
     function openAddressSearchEmbed(){
       const help = el("addrHelp");
       help.textContent = "";
@@ -1140,7 +1151,6 @@
     function init(){
       initGate();
 
-      // Step navigation
       el("toStep2").onclick = ()=>setStep(2);
       el("toStep3").onclick = ()=>setStep(3);
       el("toStep4").onclick = ()=>setStep(4);
@@ -1148,10 +1158,8 @@
       el("backTo2").onclick = ()=>setStep(2);
       el("backTo3").onclick = ()=>setStep(3);
 
-      // Cart
       el("clearCartBtn").onclick = clearCart;
 
-      // Form input validation
       [
         "ordererName","ordererEmpId","ordererPhone","ordererDept",
         "recvName","recvPhone","zip","addr1","addr2","note"
@@ -1162,17 +1170,14 @@
         });
       });
 
-      // Address
       el("addrSearchBtn").onclick = openAddressSearchEmbed;
 
-      // Submit flow
       el("submitBtn").onclick = openSummary;
       el("closeSummaryBtn").onclick = closeSummary;
       el("summaryBackdrop").addEventListener("click", e=>{
         if(e.target===el("summaryBackdrop")) closeSummary();
       });
 
-      // Render
       renderTabs();
       renderProducts();
       renderCartForStep4();
@@ -1180,7 +1185,6 @@
       renderTotals();
       validateStepButtons();
 
-      // 전화번호 자동 하이픈(주문자/수령자)
       ["ordererPhone", "recvPhone"].forEach((id) => {
         el(id).addEventListener("input", (e) => {
           const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
