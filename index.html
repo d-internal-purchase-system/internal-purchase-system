@@ -66,12 +66,14 @@
     }
 
     .product{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:10px;min-width:0;}
-  .productTop{
-  display:grid;
-  grid-template-columns: 90px 1fr auto; /* 썸네일 / 정보 / 가격 */
+.productTop{
+  display:flex;
   gap:12px;
-  align-items:start;
+  align-items:flex-start;
+  min-width:0;
+  flex-wrap:wrap; /* 중요: price를 다음줄로 보내려면 wrap 필요 */
 }
+
     .thumb{
       width:90px;height:90px;border-radius:14px;border:1px solid var(--line);
       background:#f9fafb;display:grid;place-items:center;overflow:hidden;flex:0 0 auto;
@@ -113,12 +115,14 @@
       background:#f9fafb;
     }
 
-   .price{
-  margin-left:0;          /* grid에서는 필요없음 */
+.price{
+  width:100%;          /* 한 줄 먹기 */
+  margin-left:0;       /* 기존 auto 제거 */
+  text-align:right;    /* 오른쪽 정렬 */
   white-space:nowrap;
-  font-weight:900;
-  justify-self:end;       /* 항상 오른쪽 */
+  order:3;             /* thumb/info 다음에 오게 */
 }
+
 @media (max-width:860px){
   .price{
     width:auto;
