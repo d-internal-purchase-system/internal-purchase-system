@@ -187,6 +187,7 @@
     .cartItem .meta{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.35;}
     .mini{display:flex;gap:6px;align-items:center;justify-content:flex-end;}
     .miniBtn{width:30px;height:30px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:900;display:grid;place-items:center;}
+    .miniBtn:disabled{opacity:.45;cursor:not-allowed;}
     .miniQty{min-width:26px;text-align:center;font-weight:900;font-size:13px;}
     .sumBox{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;}
     .sumRow{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:6px 0;}
@@ -281,7 +282,11 @@
           <div class="row" style="justify-content:space-between;">
             <div>
               <h2 style="margin:0;font-size:15px;letter-spacing:-.1px;">상품 선택</h2>
-              <div class="muted" style="font-size:12px;margin-top:6px;">카테고리에서 담고, 오른쪽 장바구니에서 수량을 조절하세요. (품목별 최대 <b id="maxQtyText"></b>개) <br> 제품 사진을 클릭하면 세부 설명을 확인할 수 있습니다.</div>
+              <div class="muted" style="font-size:12px;margin-top:6px;">
+                카테고리에서 담고, 오른쪽 장바구니에서 수량을 조절하세요.
+                (기본 최대 <b id="maxQtyText"></b>개, 일부 품목은 1개 제한)
+                <br> 제품 사진을 클릭하면 세부 설명을 확인할 수 있습니다.
+              </div>
             </div>
             <button class="btn danger" id="clearCartBtn" disabled>장바구니 비우기</button>
           </div>
@@ -370,12 +375,13 @@
 
           <div class="divider"></div>
           <div class="row" style="margin:0 0 10px;">
-  <label style="margin:0;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:800;">
-    <input type="checkbox" id="sameAsOrdererChk">
-    주문자 정보와 동일(이름/연락처)
-  </label>
-  <span class="muted" style="font-size:12px;">(체크하면 자동 입력됩니다)</span>
-</div>
+            <label style="margin:0;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:800;">
+              <input type="checkbox" id="sameAsOrdererChk">
+              주문자 정보와 동일(이름/연락처)
+            </label>
+            <span class="muted" style="font-size:12px;">(체크하면 자동 입력됩니다)</span>
+          </div>
+
           <div class="form">
             <div>
               <label>수령인 이름 *</label>
@@ -598,6 +604,13 @@
      * ✅ 품목별 최대 주문 수량
      **********************************************************/
     const MAX_QTY_PER_ITEM = 10;
+    const ITEM_MAX_QTY = {
+      "KT-02": 1,
+      "CW-02": 1,
+    };
+    function getItemMaxQty(productId){
+      return ITEM_MAX_QTY[productId] ?? MAX_QTY_PER_ITEM;
+    }
 
     /**********************************************************
      * 배송비 정책 (우편번호 기준)
@@ -845,39 +858,39 @@
         const qty = document.createElement("input");
         qty.type="number";
         qty.min="1";
-        qty.max=String(MAX_QTY_PER_ITEM);
+        qty.max=String(getItemMaxQty(p.id));   // ✅ 품목별 max 적용
         qty.step="1";
         qty.value="1";
         qty.className="qty";
+        if (isSoldOut) qty.disabled = true;
 
         const btn = document.createElement("button");
         btn.className="btn primary";
         btn.textContent = isSoldOut ? "품절" : "담기";
         btn.disabled = isSoldOut;
 
-btn.onclick = ()=>{
-  const raw = parseInt(qty.value || "1", 10);
-  const requested = Number.isFinite(raw) ? Math.max(1, raw) : 1;
+        btn.onclick = ()=>{
+          const max = getItemMaxQty(p.id);
 
-  const curQty = state.cart.get(p.id)?.qty || 0;
-  const addable = Math.max(0, MAX_QTY_PER_ITEM - curQty);
+          const raw = parseInt(qty.value || "1", 10);
+          const requested = Number.isFinite(raw) ? Math.max(1, raw) : 1;
 
-  if (addable === 0) {
-    toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
-    return;
-  }
+          const curQty = state.cart.get(p.id)?.qty || 0;
+          const addable = Math.max(0, max - curQty);
 
-  const willAdd = Math.min(requested, addable);
+          if (addable === 0) {
+            toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`);
+            return;
+          }
 
-  // ✅ 잘려서 담길 때는 이 메시지만 띄우고 끝
-  const msg = (requested > willAdd)
-    ? `요청 ${requested}개 중 ${willAdd}개만 담겼습니다 (최대 ${MAX_QTY_PER_ITEM}개)`
-    : "장바구니에 담았습니다";
+          const willAdd = Math.min(requested, addable);
 
-  addToCart(p.id, willAdd, { toastMsg: msg });
-};
+          const msg = (requested > willAdd)
+            ? `요청 ${requested}개 중 ${willAdd}개만 담겼습니다 (최대 ${max}개)`
+            : "장바구니에 담았습니다";
 
-
+          addToCart(p.id, willAdd, { toastMsg: msg });
+        };
 
         qtyWrap.appendChild(qty);
         qtyWrap.appendChild(btn);
@@ -889,35 +902,34 @@ btn.onclick = ()=>{
       }
     }
 
-function addToCart(productId, qty, opts = {}){
-  const product = PRODUCTS.find(x=>x.id===productId);
-  if(!product) return;
+    function addToCart(productId, qty, opts = {}){
+      const product = PRODUCTS.find(x=>x.id===productId);
+      if(!product) return;
 
-  if(product.soldOut === true){
-    toast("품절된 상품입니다");
-    return;
-  }
+      if(product.soldOut === true){
+        toast("품절된 상품입니다");
+        return;
+      }
 
-  const curQty = state.cart.get(productId)?.qty || 0;
-  const nextQty = Math.min(MAX_QTY_PER_ITEM, curQty + qty);
+      const max = getItemMaxQty(productId); // ✅ 품목별 max 적용
+      const curQty = state.cart.get(productId)?.qty || 0;
+      const nextQty = Math.min(max, curQty + qty);
 
-  if(nextQty === curQty){
-    toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
-    return;
-  }
+      if(nextQty === curQty){
+        toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`);
+        return;
+      }
 
-  state.cart.set(productId, {product, qty: nextQty});
+      state.cart.set(productId, {product, qty: nextQty});
 
-  // ✅ 여기서 토스트를 "딱 1번"만
-  if (opts.toastMsg) toast(opts.toastMsg);
-  else toast("장바구니에 담았습니다");
+      if (opts.toastMsg) toast(opts.toastMsg);
+      else toast("장바구니에 담았습니다");
 
-  renderCartForStep4();
-  renderCartPreview();
-  renderTotals();
-  validateStepButtons();
-}
-
+      renderCartForStep4();
+      renderCartPreview();
+      renderTotals();
+      validateStepButtons();
+    }
 
     function changeQty(productId, delta){
       const p = PRODUCTS.find(x=>x.id===productId);
@@ -931,11 +943,18 @@ function addToCart(productId, qty, opts = {}){
       if(!state.cart.has(productId)) return;
       const cur = state.cart.get(productId);
 
+      const max = getItemMaxQty(productId); // ✅ 품목별 max 적용
+
+      if (delta > 0 && cur.qty >= max){
+        toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`);
+        return;
+      }
+
       cur.qty += delta;
 
-      if(cur.qty > MAX_QTY_PER_ITEM){
-        cur.qty = MAX_QTY_PER_ITEM;
-        toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
+      if(cur.qty > max){
+        cur.qty = max;
+        toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`);
       }
 
       if(cur.qty<=0) state.cart.delete(productId);
@@ -992,6 +1011,9 @@ function addToCart(productId, qty, opts = {}){
       }
 
       for(const [id,{product,qty}] of state.cart.entries()){
+        const max = getItemMaxQty(id);
+        const plusDisabled = (qty >= max) || (product.soldOut === true);
+
         const item = document.createElement("div");
         item.className="cartItem";
         item.innerHTML = `
@@ -1003,7 +1025,7 @@ function addToCart(productId, qty, opts = {}){
             <div class="mini">
               <button class="miniBtn" type="button" data-minus="${id}">−</button>
               <div class="miniQty">${qty}</div>
-              <button class="miniBtn" type="button" data-plus="${id}">+</button>
+              <button class="miniBtn" type="button" data-plus="${id}" ${plusDisabled ? "disabled" : ""}>+</button>
             </div>
             <div style="margin-top:6px;font-weight:900;">${fmt(product.price*qty)}원</div>
           </div>
@@ -1030,6 +1052,9 @@ function addToCart(productId, qty, opts = {}){
         return;
       }
       for(const [id,{product,qty}] of state.cart.entries()){
+        const max = getItemMaxQty(id);
+        const plusDisabled = (qty >= max) || (product.soldOut === true);
+
         const item = document.createElement("div");
         item.className="cartItem";
         item.innerHTML = `
@@ -1041,7 +1066,7 @@ function addToCart(productId, qty, opts = {}){
             <div class="mini">
               <button class="miniBtn" type="button" data-minus="${id}">−</button>
               <div class="miniQty">${qty}</div>
-              <button class="miniBtn" type="button" data-plus="${id}">+</button>
+              <button class="miniBtn" type="button" data-plus="${id}" ${plusDisabled ? "disabled" : ""}>+</button>
             </div>
             <div style="margin-top:6px;font-weight:900;">${fmt(product.price*qty)}원</div>
           </div>
@@ -1335,6 +1360,11 @@ function addToCart(productId, qty, opts = {}){
         "recvName","recvPhone","zip","addr1","addr2","note"
       ].forEach(id=>{
         el(id).addEventListener("input", ()=>{
+          // ✅ 주문자=수령자 체크 상태면 실시간 동기화
+          if (el("sameAsOrdererChk").checked && (id==="ordererName" || id==="ordererPhone")){
+            el("recvName").value = el("ordererName").value.trim();
+            el("recvPhone").value = el("ordererPhone").value.trim();
+          }
           if(id==="zip") recalcShipping();
           validateStepButtons();
         });
@@ -1363,25 +1393,24 @@ function addToCart(productId, qty, opts = {}){
           else e.target.value = digits.replace(/(\d{3})(\d{4})(\d+)/, "$1-$2-$3");
         });
       });
+
+      // ✅ 주문자=수령자 자동입력 (위치: init 안)
+      el("sameAsOrdererChk").addEventListener("change", (e) => {
+        const on = e.target.checked;
+
+        if (on) {
+          el("recvName").value = el("ordererName").value.trim();
+          el("recvPhone").value = el("ordererPhone").value.trim();
+          toast("수령자 정보에 주문자 정보를 입력했습니다");
+        } else {
+          el("recvName").value = "";
+          el("recvPhone").value = "";
+        }
+
+        validateStepButtons();
+      });
     }
-// 주문자=수령자 자동입력
-el("sameAsOrdererChk").addEventListener("change", (e) => {
-  const on = e.target.checked;
 
-  if (on) {
-    el("recvName").value = el("ordererName").value.trim();
-    el("recvPhone").value = el("ordererPhone").value.trim();
-    toast("수령자 정보에 주문자 정보를 입력했습니다");
-  } else {
-    // 해제 시 비우기(원하면 이 2줄 지워도 됨)
-    el("recvName").value = "";
-    el("recvPhone").value = "";
-  }
-
-  validateStepButtons();
-});
-
-    
     init();
   </script>
 
