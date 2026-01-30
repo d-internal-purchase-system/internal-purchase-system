@@ -1,3 +1,4 @@
+<!-- ✅ 아래는 "최소주문금액 20,000원"이 이미 반영된 전체 코드(그대로 붙여넣기용)입니다. -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -177,26 +178,25 @@
 
     .qty{width:86px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:14px;outline:none;}
     .miniHint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:4px;}
-    
-.qtyBadge{
-  position:absolute;
-  right:10px;
-  bottom:10px;
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:900;
-  background:#111827;
-  color:#fff;
-  border:1px solid rgba(255,255,255,.35);
-  box-shadow:0 10px 24px rgba(17,24,39,.22);
-}
 
-.qtyBadge.red{
-  background:#b91c1c;
-}
+    .qtyBadge{
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      background:#111827;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.35);
+      box-shadow:0 10px 24px rgba(17,24,39,.22);
+    }
 
-    
+    .qtyBadge.red{
+      background:#b91c1c;
+    }
+
     /* cart */
     .cartList{display:flex;flex-direction:column;gap:10px;}
     .cartItem{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;display:flex;justify-content:space-between;gap:10px;min-width:0;}
@@ -342,6 +342,8 @@
                   <div class="sumRow"><span class="muted">배송비</span><strong id="shipFeeLine">0원</strong></div>
                   <div class="sumRow"><span>총 결제금액(실결제 없음)</span><strong id="grandTotal">0원</strong></div>
                   <div class="miniHint" id="shipReason" style="margin-top:8px;"></div>
+                  <!-- ✅ 최소주문금액 안내 -->
+                  <div class="miniHint" id="minOrderHint" style="margin-top:6px;"></div>
                 </div>
 
                 <div class="divider"></div>
@@ -621,6 +623,11 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzm2Yjy6K5hj8o79IL-_YTgMyD7VTi9VO0JJEfhOzo42rHOhOhTAMpeOPO5chpggPLW/exec";
 
     /**********************************************************
+     * ✅ 최소 주문금액 (상품 합계 기준)
+     **********************************************************/
+    const MIN_ORDER_AMOUNT = 20000;
+
+    /**********************************************************
      * ✅ 품목별 최대 주문 수량
      **********************************************************/
     const MAX_QTY_PER_ITEM = 10;
@@ -730,6 +737,11 @@
     }
     function calcGrandTotal(){ return calcItemsTotal() + state.shipFee; }
 
+    // ✅ 최소주문금액 체크
+    function minOrderOk(){
+      return calcItemsTotal() >= MIN_ORDER_AMOUNT;
+    }
+
     function setStep(active){
       ["1","2","3","4"].forEach(n=>{
         el("step"+n).classList.toggle("active", n===String(active));
@@ -739,7 +751,10 @@
     }
 
     function validateStepButtons(){
-      el("toStep2").disabled = !(state.cart.size > 0);
+      const itemsTotal = calcItemsTotal();
+      const minOk = itemsTotal >= MIN_ORDER_AMOUNT;
+
+      el("toStep2").disabled = !(state.cart.size > 0 && minOk);
 
       const ordererOk =
         el("ordererName").value.trim() &&
@@ -747,13 +762,16 @@
         el("ordererPhone").value.trim() &&
         el("ordererDept").value.trim();
 
-      el("toStep3").disabled = !(state.cart.size > 0 && ordererOk);
+      el("toStep3").disabled = !(state.cart.size > 0 && minOk && ordererOk);
 
       const recvOk = el("recvName").value.trim() && el("recvPhone").value.trim();
       const addrOk = el("zip").value.trim() && el("addr1").value.trim() && el("addr2").value.trim();
-      el("toStep4").disabled = !(state.cart.size > 0 && ordererOk && recvOk && addrOk);
+      el("toStep4").disabled = !(state.cart.size > 0 && minOk && ordererOk && recvOk && addrOk);
 
       el("clearCartBtn").disabled = !(state.cart.size > 0);
+
+      // ✅ 4단계 요약 버튼도 최소금액 미달이면 비활성
+      el("submitBtn").disabled = !(state.cart.size > 0 && minOk);
     }
 
     function recalcShipping(){
@@ -761,6 +779,7 @@
       state.shipFee = ship.fee;
       state.shipFeeReason = ship.reason;
       renderTotals();
+      validateStepButtons();
     }
 
     function renderTabs(){
@@ -808,16 +827,13 @@
             (p.longDesc || p.detail || p.desc || "").trim()
           );
           thumb.appendChild(img);
-          // 예: 2입/4종 같은 “구성 수량”을 표시하고 싶을 때
-if (p.packQty){
-  const b = document.createElement("div");
-  b.className = "qtyBadge red";
-b.textContent = p.packQty;
 
-  thumb.appendChild(b);
-}
-
-
+          if (p.packQty){
+            const b = document.createElement("div");
+            b.className = "qtyBadge red";
+            b.textContent = p.packQty;
+            thumb.appendChild(b);
+          }
         } else {
           thumb.innerHTML = `<div class="ph">IMG</div>`;
         }
@@ -836,7 +852,6 @@ b.textContent = p.packQty;
         info.appendChild(name);
         info.appendChild(pid);
 
-        // ✅ chips (SOLD OUT + 할인)
         const chips = document.createElement("div");
         chips.className = "chips";
 
@@ -888,7 +903,7 @@ b.textContent = p.packQty;
         const qty = document.createElement("input");
         qty.type="number";
         qty.min="1";
-        qty.max=String(getItemMaxQty(p.id));   // ✅ 품목별 max 적용
+        qty.max=String(getItemMaxQty(p.id));
         qty.step="1";
         qty.value="1";
         qty.className="qty";
@@ -941,7 +956,7 @@ b.textContent = p.packQty;
         return;
       }
 
-      const max = getItemMaxQty(productId); // ✅ 품목별 max 적용
+      const max = getItemMaxQty(productId);
       const curQty = state.cart.get(productId)?.qty || 0;
       const nextQty = Math.min(max, curQty + qty);
 
@@ -964,7 +979,6 @@ b.textContent = p.packQty;
     function changeQty(productId, delta){
       const p = PRODUCTS.find(x=>x.id===productId);
 
-      // ✅ SOLD OUT이면 +로 증가 불가
       if(delta > 0 && p && p.soldOut === true){
         toast("품절된 상품입니다");
         return;
@@ -973,7 +987,7 @@ b.textContent = p.packQty;
       if(!state.cart.has(productId)) return;
       const cur = state.cart.get(productId);
 
-      const max = getItemMaxQty(productId); // ✅ 품목별 max 적용
+      const max = getItemMaxQty(productId);
 
       if (delta > 0 && cur.qty >= max){
         toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`);
@@ -1025,6 +1039,13 @@ b.textContent = p.packQty;
       el("shipReason").textContent = r ? `※ ${r}` : "";
       el("shipReason2").textContent = r ? `※ ${r}` : "";
       el("shipReasonNow").textContent = r ? `※ ${r}` : "";
+
+      // ✅ 최소주문금액 안내
+      const remain = Math.max(0, MIN_ORDER_AMOUNT - itemsTotal);
+      el("minOrderHint").textContent =
+        (itemsTotal < MIN_ORDER_AMOUNT)
+          ? `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 (현재 ${fmt(itemsTotal)}원 / ${fmt(remain)}원 더 담아주세요)`
+          : `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 충족`;
     }
 
     function renderCartPreview(){
@@ -1187,6 +1208,17 @@ b.textContent = p.packQty;
     }
 
     function openSummary(){
+      // ✅ 최소주문금액 가드 (요약 진입 차단)
+      if(state.cart.size === 0){
+        toast("장바구니가 비어있습니다");
+        return;
+      }
+      if(!minOrderOk()){
+        const remain = Math.max(0, MIN_ORDER_AMOUNT - calcItemsTotal());
+        toast(`최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 ( ${fmt(remain)}원 더 담아주세요 )`);
+        return;
+      }
+
       const payload = buildPayload();
 
       const kv = el("summaryKV");
@@ -1252,6 +1284,17 @@ b.textContent = p.packQty;
     }
 
     async function submit(payload){
+      // ✅ 최종 제출 전 최소주문금액 가드 (뚫림 방지)
+      if(state.cart.size === 0){
+        toast("장바구니가 비어있습니다");
+        return;
+      }
+      if(calcItemsTotal() < MIN_ORDER_AMOUNT){
+        const remain = Math.max(0, MIN_ORDER_AMOUNT - calcItemsTotal());
+        toast(`최소주문금액 미달 (${fmt(remain)}원 더 담아주세요)`);
+        return;
+      }
+
       const st = el("sendStatus");
       const btn = el("confirmSendBtn");
 
@@ -1390,7 +1433,6 @@ b.textContent = p.packQty;
         "recvName","recvPhone","zip","addr1","addr2","note"
       ].forEach(id=>{
         el(id).addEventListener("input", ()=>{
-          // ✅ 주문자=수령자 체크 상태면 실시간 동기화
           if (el("sameAsOrdererChk").checked && (id==="ordererName" || id==="ordererPhone")){
             el("recvName").value = el("ordererName").value.trim();
             el("recvPhone").value = el("ordererPhone").value.trim();
@@ -1424,7 +1466,6 @@ b.textContent = p.packQty;
         });
       });
 
-      // ✅ 주문자=수령자 자동입력 (위치: init 안)
       el("sameAsOrdererChk").addEventListener("change", (e) => {
         const on = e.target.checked;
 
