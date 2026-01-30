@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>[도루코] 임직원 구매 신청</title>
+  <title> 임직원 구매 신청</title>
 
   <!-- 주소검색(다음/카카오). 사내망에서 차단되면 주소검색이 안 뜰 수 있음 -->
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -855,21 +855,27 @@
         btn.textContent = isSoldOut ? "품절" : "담기";
         btn.disabled = isSoldOut;
 
-        btn.onclick = ()=>{
-          if (isSoldOut){
-            toast("품절된 상품입니다");
-            return;
-          }
-          const desired = Math.max(1, Math.min(MAX_QTY_PER_ITEM, parseInt(qty.value||"1",10)));
-          const curQty = state.cart.get(p.id)?.qty || 0;
-          const addable = Math.max(0, MAX_QTY_PER_ITEM - curQty);
+btn.onclick = ()=>{
+  const raw = parseInt(qty.value || "1", 10);
+  const requested = Number.isFinite(raw) ? Math.max(1, raw) : 1; // 사용자가 입력한 값(그대로)
+  const curQty = state.cart.get(p.id)?.qty || 0;
+  const addable = Math.max(0, MAX_QTY_PER_ITEM - curQty);
 
-          if(addable === 0){
-            toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
-            return;
-          }
-          addToCart(p.id, Math.min(desired, addable));
-        };
+  if (addable === 0) {
+    toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
+    return;
+  }
+
+  const willAdd = Math.min(requested, addable);
+
+  // ✅ 입력값이 잘려서 담길 때 경고
+  if (requested > willAdd) {
+    toast(`요청 ${requested}개 중 ${willAdd}개만 담겼습니다 (최대 ${MAX_QTY_PER_ITEM}개)`);
+  }
+
+  addToCart(p.id, willAdd);
+};
+
 
         qtyWrap.appendChild(qty);
         qtyWrap.appendChild(btn);
