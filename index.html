@@ -668,21 +668,21 @@
 
     const PRODUCTS = [
       // 면도기 5
-      { id:"RZ-01", category:"면도기", name:"터치3 휴대용면도기 2입", price:4000, desc:"-", detail:"", longDesc:"Touch3 휴대용 면도기 2입", image:"RZ-01.jpg", discount: 88 },
-      { id:"RZ-02", category:"면도기", name:"(K7)PACE6 골드기획2호", price:10000, desc:"PACE시스템 전제품 호환 가능", detail:"", longDesc:"1) PACE6 면도기(날포함) 1ea\n2) PACE6 면도날 4ea\n\nPACE시스템 전제품 호환 가능", image:"RZ-02.jpg", discount: 90 },
-      { id:"RZ-03", category:"면도기", name:"PACE 3D 모션 홈쇼핑기획4호 1+1", price:10000, desc:"폼 유통기한:26년 4월", detail:"", longDesc:"1) 3D모션 면도기(날포함) 1ea\n2) 3D모션 면도날 11ea\n3) 네이비 스탠드 1ea\n4) PACE 아쿠아 쉐이빙폼 250ml 1ea\n\n폼 유통기한: 26년 4월", image:"RZ-03.jpg", discount: 92 },
-      { id:"RZ-04", category:"면도기", name:"EVE 크리미 기획세트 2호 1+1", price:5000, desc:"", detail:"폼 유통기한:26년 4월", longDesc:"1) 이브 크리미 면도기(날포함) 1ea\n2) 샤이 크리미 면도날 1ea\n3) 샤이 심플 눈썹면도기 3ea\n4) 샤이 비키니 면도기 1ea\n5) 페이스 프레쉬 폼 250ml 1ea\n\n폼 유통기한: 26년 4월", image:"RZ-04.jpg", discount: 90 },
-      { id:"RZ-05", category:"면도기", name:"슬릭모션 온라인 기획세트1호", price:25000, desc:"", detail:"", longDesc:"1) 슬릭모션 면도기(날포함) 1ea\n2) 면도날 9ea", image:"RZ-05.jpg", discount: 54 },
+      { id:"RZ-01", category:"면도기", name:"터치3 휴대용면도기 2입", price:4000, desc:"-", detail:"", longDesc:"Touch3 휴대용 면도기 2입", image:"RZ-01.jpg", discount: 88, soldOut: false },
+      { id:"RZ-02", category:"면도기", name:"(K7)PACE6 골드기획2호", price:10000, desc:"PACE시스템 전제품 호환 가능", detail:"", longDesc:"1) PACE6 면도기(날포함) 1ea\n2) PACE6 면도날 4ea\n\nPACE시스템 전제품 호환 가능", image:"RZ-02.jpg", discount: 90, soldOut: false },
+      { id:"RZ-03", category:"면도기", name:"PACE 3D 모션 홈쇼핑기획4호 1+1", price:10000, desc:"폼 유통기한:26년 4월", detail:"", longDesc:"1) 3D모션 면도기(날포함) 1ea\n2) 3D모션 면도날 11ea\n3) 네이비 스탠드 1ea\n4) PACE 아쿠아 쉐이빙폼 250ml 1ea\n\n폼 유통기한: 26년 4월", image:"RZ-03.jpg", discount: 92, soldOut: false },
+      { id:"RZ-04", category:"면도기", name:"EVE 크리미 기획세트 2호 1+1", price:5000, desc:"", detail:"폼 유통기한:26년 4월", longDesc:"1) 이브 크리미 면도기(날포함) 1ea\n2) 샤이 크리미 면도날 1ea\n3) 샤이 심플 눈썹면도기 3ea\n4) 샤이 비키니 면도기 1ea\n5) 페이스 프레쉬 폼 250ml 1ea\n\n폼 유통기한: 26년 4월", image:"RZ-04.jpg", discount: 90, soldOut: false },
+      { id:"RZ-05", category:"면도기", name:"슬릭모션 온라인 기획세트1호", price:25000, desc:"", detail:"", longDesc:"1) 슬릭모션 면도기(날포함) 1ea\n2) 면도날 9ea", image:"RZ-05.jpg", discount: 54, soldOut: false },
 
       // 주방용품 4
-      { id:"KT-01", category:"주방용품", name:"인테리어 라임 기획세트 1호", price:25000, desc:"-", detail:"", longDesc:"1) 인테리어 다용도식도 190mm(라임) 1ea\n2) 인테리어 야채용식도 170mm(라임) 1ea\n3) 인테리어 과도 120mm(라임) 1ea\n4) 인테리어 가위 110S(라임) 1ea", image:"KT-01.jpg", discount: 74 },
-      { id:"KT-02", category:"주방용품", name:"뉴클래식 라이트 특판세트 1호 1+1", price:20000, desc:"한정판매 85세트", detail:"", longDesc:"1) 베이직 가위 120S 1ea\n2) 뉴클래식라이트 다용도식도 200mm 1ea\n3) 뉴클래식 라이트 야채용식도 165mm 1ea\n\n★한정판매 85세트", image:"KT-02.jpg", discount: 85, soldOut: true },
-      { id:"KT-03", category:"주방용품", name:"클래식 키친툴 4종 세트", price:10000, desc:"한정판매 280세트", detail:"", longDesc:"1) 클래식 삼각 뒤지개 1ea\n2) 클래식 면국자 1ea\n3) 클래식 요리스푼(중) 1ea\n4) 클래식 뒤지개 1ea\n\n★한정판매 280세트", image:"KT-03.jpg", discount: 79 },
-      { id:"KT-04", category:"주방용품", name:"클래식 키친툴 3종 세트", price:3000, desc:"-", detail:"", longDesc:"1) 클래식 삼각 뒤지개 1ea\n2) 클래식 면국자 1ea\n3) 클래식 요리스푼(중) 1ea", image:"KT-04.jpg", discount: 91 },
+      { id:"KT-01", category:"주방용품", name:"인테리어 라임 기획세트 1호", price:25000, desc:"-", detail:"", longDesc:"1) 인테리어 다용도식도 190mm(라임) 1ea\n2) 인테리어 야채용식도 170mm(라임) 1ea\n3) 인테리어 과도 120mm(라임) 1ea\n4) 인테리어 가위 110S(라임) 1ea", image:"KT-01.jpg", discount: 74, soldOut: false },
+      { id:"KT-02", category:"주방용품", name:"뉴클래식 라이트 특판세트 1호 1+1", price:20000, desc:"한정판매 85세트", detail:"본 상품은 1인 1개 한정 판매입니다.", longDesc:"1) 베이직 가위 120S 1ea\n2) 뉴클래식라이트 다용도식도 200mm 1ea\n3) 뉴클래식 라이트 야채용식도 165mm 1ea\n\n★한정판매 85세트", image:"KT-02.jpg", discount: 85, soldOut: false },
+      { id:"KT-03", category:"주방용품", name:"클래식 키친툴 4종 세트", price:10000, desc:"한정판매 280세트", detail:"", longDesc:"1) 클래식 삼각 뒤지개 1ea\n2) 클래식 면국자 1ea\n3) 클래식 요리스푼(중) 1ea\n4) 클래식 뒤지개 1ea\n\n★한정판매 280세트", image:"KT-03.jpg", discount: 79, soldOut: false },
+      { id:"KT-04", category:"주방용품", name:"클래식 키친툴 3종 세트", price:3000, desc:"-", detail:"", longDesc:"1) 클래식 삼각 뒤지개 1ea\n2) 클래식 면국자 1ea\n3) 클래식 요리스푼(중) 1ea", image:"KT-04.jpg", discount: 91, soldOut: false },
 
       // 쿡웨어 2
-      { id:"CW-01", category:"쿡웨어", name:"포레스타 시즌3 IH 7종세트", price:50000, desc:"-", detail:"", longDesc:"1) 포레스타 IH 편수 20cm 1ea\n2) 포레스타 IH 프라이팬 28cm 2ea\n3) 포레스타 IH 궁중팬 26cm 1ea\n4) 포레스타 IH 전골팬 26cm 1ea\n5) 유리뚜껑 20cm 1ea\n6) 유리뚜껑 26cm 1ea\n7) 증정품 귀리쌀 (포장일 2023년)", image:"CW-01.jpg", discount: 69 },
-      { id:"CW-02", category:"쿡웨어", name:"애쉬블루 IH 프라이팬 2종 세트 1호", price:10000, desc:"-", detail:"", longDesc:"1) 애쉬블루 프라이팬 24cm 1ea\n2) 애쉬블루 프라이팬 28cm 1ea", image:"CW-02.jpg", discount: 83 },
+      { id:"CW-01", category:"쿡웨어", name:"포레스타 시즌3 IH 7종세트", price:50000, desc:"-", detail:"", longDesc:"1) 포레스타 IH 편수 20cm 1ea\n2) 포레스타 IH 프라이팬 28cm 2ea\n3) 포레스타 IH 궁중팬 26cm 1ea\n4) 포레스타 IH 전골팬 26cm 1ea\n5) 유리뚜껑 20cm 1ea\n6) 유리뚜껑 26cm 1ea\n7) 증정품 귀리쌀 (포장일 2023년)", image:"CW-01.jpg", discount: 69, soldOut: false },
+      { id:"CW-02", category:"쿡웨어", name:"애쉬블루 IH 프라이팬 2종 세트 1호", price:10000, desc:"본 상품은 1인 1개 한정 판매입니다.", detail:"본 상품은 특가 판매 상품으로, 박스 상태에 경미한 흠집이나 눌림이 있을 수 있으며, 해당 사유로 교환/반품은 어렵습니다.", longDesc:"1) 애쉬블루 프라이팬 24cm 1ea\n2) 애쉬블루 프라이팬 28cm 1ea", image:"CW-02.jpg", discount: 83, soldOut: false },
     ];
 
     const state = {
