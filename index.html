@@ -857,7 +857,8 @@
 
 btn.onclick = ()=>{
   const raw = parseInt(qty.value || "1", 10);
-  const requested = Number.isFinite(raw) ? Math.max(1, raw) : 1; // 사용자가 입력한 값(그대로)
+  const requested = Number.isFinite(raw) ? Math.max(1, raw) : 1;
+
   const curQty = state.cart.get(p.id)?.qty || 0;
   const addable = Math.max(0, MAX_QTY_PER_ITEM - curQty);
 
@@ -868,13 +869,14 @@ btn.onclick = ()=>{
 
   const willAdd = Math.min(requested, addable);
 
-  // ✅ 입력값이 잘려서 담길 때 경고
-  if (requested > willAdd) {
-    toast(`요청 ${requested}개 중 ${willAdd}개만 담겼습니다 (최대 ${MAX_QTY_PER_ITEM}개)`);
-  }
+  // ✅ 잘려서 담길 때는 이 메시지만 띄우고 끝
+  const msg = (requested > willAdd)
+    ? `요청 ${requested}개 중 ${willAdd}개만 담겼습니다 (최대 ${MAX_QTY_PER_ITEM}개)`
+    : "장바구니에 담았습니다";
 
-  addToCart(p.id, willAdd);
+  addToCart(p.id, willAdd, { toastMsg: msg });
 };
+
 
 
         qtyWrap.appendChild(qty);
@@ -887,37 +889,35 @@ btn.onclick = ()=>{
       }
     }
 
-    function addToCart(productId, qty){
-      const product = PRODUCTS.find(x=>x.id===productId);
-      if(!product) return;
+function addToCart(productId, qty, opts = {}){
+  const product = PRODUCTS.find(x=>x.id===productId);
+  if(!product) return;
 
-      // ✅ SOLD OUT 최종 차단
-      if(product.soldOut === true){
-        toast("품절된 상품입니다");
-        return;
-      }
+  if(product.soldOut === true){
+    toast("품절된 상품입니다");
+    return;
+  }
 
-      const curQty = state.cart.get(productId)?.qty || 0;
-      const nextQty = Math.min(MAX_QTY_PER_ITEM, curQty + qty);
+  const curQty = state.cart.get(productId)?.qty || 0;
+  const nextQty = Math.min(MAX_QTY_PER_ITEM, curQty + qty);
 
-      if(nextQty === curQty){
-        toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
-        return;
-      }
+  if(nextQty === curQty){
+    toast(`해당 품목은 최대 ${MAX_QTY_PER_ITEM}개까지 주문 가능합니다`);
+    return;
+  }
 
-      state.cart.set(productId, {product, qty: nextQty});
+  state.cart.set(productId, {product, qty: nextQty});
 
-      if(curQty + qty > MAX_QTY_PER_ITEM){
-        toast(`최대 ${MAX_QTY_PER_ITEM}개까지만 담겼습니다`);
-      }else{
-        toast("장바구니에 담았습니다");
-      }
+  // ✅ 여기서 토스트를 "딱 1번"만
+  if (opts.toastMsg) toast(opts.toastMsg);
+  else toast("장바구니에 담았습니다");
 
-      renderCartForStep4();
-      renderCartPreview();
-      renderTotals();
-      validateStepButtons();
-    }
+  renderCartForStep4();
+  renderCartPreview();
+  renderTotals();
+  validateStepButtons();
+}
+
 
     function changeQty(productId, delta){
       const p = PRODUCTS.find(x=>x.id===productId);
