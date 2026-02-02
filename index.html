@@ -1047,8 +1047,7 @@
       const remain = Math.max(0, MIN_ORDER_AMOUNT - itemsTotal);
       el("minOrderHint").textContent =
         (itemsTotal < MIN_ORDER_AMOUNT)
-          ? `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 <br> 
-          (현재 ${fmt(itemsTotal)}원 / ${fmt(remain)}원 더 담아주세요)`
+          ? `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 (현재 ${fmt(itemsTotal)}원 / ${fmt(remain)}원 더 담아주세요)`
           : `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 충족`;
     }
 
