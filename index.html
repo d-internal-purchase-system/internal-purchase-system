@@ -477,8 +477,8 @@
             <p class="title">입금 안내</p>
             <p class="text">
               아래 계좌로 입금해주세요.<br>
-              <b>입금계좌:</b> 우리은행/ 2656-3515-618154/ 개인구매 주식회사 도루코<br>
-              입금자는 주문자와 동일해야 합니다.<br>
+              <b>입금계좌: 우리은행/ 2656-3515-618154/ 개인구매 주식회사 도루코</b><br>
+              <b>입금자는 주문자와 동일해야 합니다.</b><br>
             </p>
           </div>
 
@@ -636,6 +636,7 @@
     const ITEM_MAX_QTY = {
       "KT-02": 1,
       "CW-02": 1,
+      "RZ-02": 1,
     };
     function getItemMaxQty(productId){
       return ITEM_MAX_QTY[productId] ?? MAX_QTY_PER_ITEM;
@@ -698,7 +699,7 @@
     const PRODUCTS = [
       // 면도기 5
       { id:"RZ-01", category:"면도기", name:"터치3 휴대용면도기 2입", price:4000, desc:"20EA", detail:"", longDesc:"Touch3 휴대용 면도기 2입", image:"RZ-01.jpg", discount: 88, soldOut: false,packQty: "x20" },
-      { id:"RZ-02", category:"면도기", name:"페이스6 골드기획 2호", price:10000, desc:"10EA", detail:"", longDesc:"1) PACE6 면도기(날포함) 1ea\n2) PACE6 면도날 4ea\n\nPACE시스템 전제품 호환 가능", image:"RZ-02.jpg", discount: 90, soldOut: false, packQty: "x10" },
+      { id:"RZ-02", category:"면도기", name:"페이스6 골드기획 2호", price:10000, desc:"10EA", detail:"1인 1개 한정 판매", longDesc:"1) PACE6 면도기(날포함) 1ea\n2) PACE6 면도날 4ea\n\nPACE시스템 전제품 호환 가능", image:"RZ-02.jpg", discount: 90, soldOut: false, packQty: "x10" },
       { id:"RZ-03", category:"면도기", name:"페이스3D 모션 홈쇼핑기획 4호 1+1", price:10000, desc:"폼 유통기한: 26년 4월", detail:"", longDesc:"1) 3D모션 면도기(날포함) 1ea\n2) 3D모션 면도날 11ea\n3) 네이비 스탠드 1ea\n4) PACE 아쿠아 쉐이빙폼 250ml 1ea\n\n폼 유통기한: 26년 4월", image:"RZ-03.jpg", discount: 92, soldOut: false, packQty: "1+1" },
       { id:"RZ-04", category:"면도기", name:"이브 크리미 기획세트 2호 1+1", price:5000, desc:"", detail:"폼 유통기한: 26년 4월", longDesc:"1) 이브 크리미 면도기(날포함) 1ea\n2) 샤이 크리미 면도날 1ea\n3) 샤이 심플 눈썹면도기 3ea\n4) 샤이 비키니 면도기 1ea\n5) 페이스 프레쉬 폼 250ml 1ea\n\n폼 유통기한: 26년 4월", image:"RZ-04.jpg", discount: 90, soldOut: false, packQty: "1+1" },
       { id:"RZ-05", category:"면도기", name:"슬릭모션 온라인 기획세트1호", price:25000, desc:"", detail:"", longDesc:"1) 슬릭모션 면도기(날포함) 1ea\n2) 면도날 9ea", image:"RZ-05.jpg", discount: 54, soldOut: false },
@@ -1046,7 +1047,7 @@
       const remain = Math.max(0, MIN_ORDER_AMOUNT - itemsTotal);
       el("minOrderHint").textContent =
         (itemsTotal < MIN_ORDER_AMOUNT)
-          ? `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 (현재 ${fmt(itemsTotal)}원 / ${fmt(remain)}원 더 담아주세요)`
+          ? `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 \n (현재 ${fmt(itemsTotal)}원 / ${fmt(remain)}원 더 담아주세요)`
           : `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 충족`;
     }
 
