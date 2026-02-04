@@ -1,4 +1,4 @@
-<!-- ✅ 아래는 "최소주문금액 20,000원"이 이미 반영된 전체 코드(그대로 붙여넣기용)입니다. -->
+<!-- ✅ 아래는 "폼 유통기한 문구 빨간색 표시"가 반영된 전체 코드(그대로 붙여넣기용)입니다. -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -141,6 +141,12 @@
       -webkit-box-orient:vertical;
       -webkit-line-clamp:3;
       overflow:hidden;
+    }
+
+    /* ✅ 폼 유통기한 강조(빨간 글씨) */
+    .expiry{
+      color:#b91c1c;
+      font-weight:900;
     }
 
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
@@ -879,11 +885,30 @@
           info.appendChild(chips);
         }
 
-        const metaText = [p.desc, p.detail].filter(Boolean).join(" · ").trim();
-        if (metaText){
+        /* ✅ meta 영역: "폼 유통기한" 문구는 빨간색으로 표시 */
+        const metaParts = [p.desc, p.detail].filter(Boolean).map(s=>String(s).trim()).filter(Boolean);
+        if (metaParts.length){
+          const expiryParts = metaParts.filter(t => /폼\s*유통기한/i.test(t));
+          const normalParts = metaParts.filter(t => !/폼\s*유통기한/i.test(t));
+
           const meta = document.createElement("p");
           meta.className = "productMeta";
-          meta.textContent = metaText;
+
+          const normalText = normalParts.join(" · ").trim();
+          if (normalText){
+            const s = document.createElement("span");
+            s.textContent = normalText;
+            meta.appendChild(s);
+          }
+
+          if (expiryParts.length){
+            if (normalText) meta.appendChild(document.createElement("br"));
+            const e = document.createElement("span");
+            e.className = "expiry";
+            e.textContent = expiryParts.join(" / ");
+            meta.appendChild(e);
+          }
+
           info.appendChild(meta);
         }
 
