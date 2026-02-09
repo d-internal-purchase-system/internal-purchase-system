@@ -1,12 +1,9 @@
-<!-- ✅ 아래는 "폼 유통기한 문구 빨간색 표시"가 반영된 전체 코드(그대로 붙여넣기용)입니다. -->
 <!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title> 임직원 구매 신청</title>
-
-  <!-- 주소검색(다음/카카오). 사내망에서 차단되면 주소검색이 안 뜰 수 있음 -->
+  <title>임직원 구매 신청</title>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
   <style>
@@ -42,7 +39,6 @@
     .section{display:none}
     .section.active{display:block}
 
-    /* grid layout for step1 */
     .step1Grid{display:grid;grid-template-columns: 1.55fr .95fr; gap:12px; align-items:start;}
     @media (max-width:960px){.step1Grid{grid-template-columns:1fr}}
     .panel{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;}
@@ -52,164 +48,42 @@
     .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--muted);white-space:nowrap;}
     .badge strong{color:var(--text)}
 
-    /* products */
     .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
     .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 10px;font-size:13px;cursor:pointer;}
     .tab.active{background:#111827;border-color:#111827;color:#fff;}
 
-    .products{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap:10px;
-    }
-    @media (max-width:520px){
-      .products{ grid-template-columns: 1fr; }
-    }
+    .products{display:grid;grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));gap:10px;}
+    @media (max-width:520px){.products{ grid-template-columns: 1fr; }}
 
-    .product{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      background:#fff;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-width:0;
-    }
-
-    /* ✅ 카드 레이아웃 통일: 썸네일(상단) → 제품명 → 품목ID → (칩/설명) → 가격 */
-    .productTop{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      align-items:stretch;
-    }
-
-    .thumb{
-      position:relative;
-      width:100%;
-      height:160px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:#f9fafb;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      padding:10px;
-    }
-
-    .thumb img{
-      max-width:100%;
-      max-height:100%;
-      width:auto;
-      height:auto;
-      object-fit:contain;
-      object-position:center;
-      display:block;
-    }
+    .product{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;display:flex;flex-direction:column;gap:10px;min-width:0;}
+    .productTop{display:flex;flex-direction:column;gap:10px;align-items:stretch;}
+    .thumb{position:relative;width:100%;height:160px;border-radius:14px;border:1px solid var(--line);background:#f9fafb;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:10px;}
+    .thumb img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;object-position:center;display:block;}
     .thumb .ph{font-size:12px;color:var(--muted);font-weight:900}
 
     .productInfo{min-width:0;}
-    .productName{
-      margin:0;
-      font-weight:900;
-      font-size:13.5px;
-      letter-spacing:-.1px;
-      line-height:1.25;
-      word-break:keep-all;
-      overflow-wrap:break-word;
-      display:-webkit-box;
-      -webkit-box-orient:vertical;
-      -webkit-line-clamp:2;
-      overflow:hidden;
-    }
-    .productId{
-      margin:4px 0 0;
-      font-size:12px;
-      color:var(--muted);
-      font-weight:800;
-    }
-    .productMeta{
-      margin:8px 0 0;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.45;
-      word-break:keep-all;
-      overflow-wrap:break-word;
-      display:-webkit-box;
-      -webkit-box-orient:vertical;
-      -webkit-line-clamp:3;
-      overflow:hidden;
-    }
-
-    /* ✅ 폼 유통기한 강조(빨간 글씨) */
-    .expiry{
-      color:#b91c1c;
-      font-weight:900;
-    }
+    .productName{margin:0;font-weight:900;font-size:13.5px;letter-spacing:-.1px;line-height:1.25;word-break:keep-all;overflow-wrap:break-word;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;}
+    .productId{margin:4px 0 0;font-size:12px;color:var(--muted);font-weight:800;}
+    .productMeta{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.45;word-break:keep-all;overflow-wrap:break-word;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
+    .expiry{color:#b91c1c;font-weight:900;}
 
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
-    .chip{
-      display:inline-flex;align-items:center;gap:6px;
-      font-size:12px;font-weight:900;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--line);
-      background:#fff;color:var(--muted);
-      white-space:nowrap;
-    }
-    .chip.off{
-      border-color:#1118271f;
-      color:#111827;
-      background:#f9fafb;
-    }
+    .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--muted);white-space:nowrap;}
+    .chip.off{border-color:#1118271f;color:#111827;background:#f9fafb;}
+    .chip.soldout{border-color:#fecaca;color:#b91c1c;background:#fff1f2;}
+    .product.isSoldout{opacity:.82;}
 
-    /* ✅ SOLD OUT */
-    .chip.soldout{
-      border-color:#fecaca;
-      color:#b91c1c;
-      background:#fff1f2;
-    }
-    .product.isSoldout{
-      opacity:.82;
-    }
-
-    .priceLine{
-      margin-top:6px;
-      display:flex;
-      justify-content:flex-end;
-      font-weight:900;
-      white-space:nowrap;
-    }
+    .priceLine{margin-top:6px;display:flex;justify-content:flex-end;font-weight:900;white-space:nowrap;}
 
     .qty{width:86px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;font-size:14px;outline:none;}
     .miniHint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:4px;}
 
-    .qtyBadge{
-      position:absolute;
-      right:10px;
-      bottom:10px;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:900;
-      background:#111827;
-      color:#fff;
-      border:1px solid rgba(255,255,255,.35);
-      box-shadow:0 10px 24px rgba(17,24,39,.22);
-    }
+    .qtyBadge{position:absolute;right:10px;bottom:10px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900;background:#111827;color:#fff;border:1px solid rgba(255,255,255,.35);box-shadow:0 10px 24px rgba(17,24,39,.22);}
+    .qtyBadge.red{background:#b91c1c;}
 
-    .qtyBadge.red{
-      background:#b91c1c;
-    }
-
-    /* cart */
     .cartList{display:flex;flex-direction:column;gap:10px;}
     .cartItem{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;display:flex;justify-content:space-between;gap:10px;min-width:0;}
-    .cartItem .name{
-      margin:0;font-weight:900;font-size:13px;max-width:360px;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;
-    }
+    .cartItem .name{margin:0;font-weight:900;font-size:13px;max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
     .cartItem .meta{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.35;}
     .mini{display:flex;gap:6px;align-items:center;justify-content:flex-end;}
     .miniBtn{width:30px;height:30px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:900;display:grid;place-items:center;}
@@ -219,17 +93,13 @@
     .sumRow{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:6px 0;}
     .sumRow strong{font-weight:900}
 
-    /* forms */
     label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;}
-    input[type="text"], input[type="tel"], textarea{
-      width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;outline:none;background:#fff;
-    }
+    input[type="text"], input[type="tel"], textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;outline:none;background:#fff;}
     textarea{min-height:90px;resize:vertical;}
     .form{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     @media (max-width:520px){.form{grid-template-columns:1fr}}
     .help{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5}
 
-    /* modal */
     .backdrop{position:fixed;inset:0;background:rgba(17,24,39,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;}
     .backdrop.open{display:flex;}
     .modal{width:min(920px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 60px rgba(17,24,39,.22);overflow:hidden;display:flex;flex-direction:column;max-height:86vh;}
@@ -245,41 +115,26 @@
     .status.ok{border-color:#bbf7d0;color:var(--ok);background:#f0fdf4;}
     .status.err{border-color:#fecaca;color:var(--danger);background:#fff1f2;}
 
-    /* gate */
-    .policy{
-      font-size:12px;line-height:1.6;background:#f9fafb;border:1px solid var(--line);
-      border-radius:14px;padding:12px;max-height:260px;overflow:auto;
-    }
+    .policy{font-size:12px;line-height:1.6;background:#f9fafb;border:1px solid var(--line);border-radius:14px;padding:12px;max-height:260px;overflow:auto;}
     .checkRow{display:flex;gap:10px;align-items:flex-start;margin-top:12px;}
     .toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 12px;border-radius:999px;font-size:13px;box-shadow:0 12px 30px rgba(17,24,39,.22);opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease;z-index:60;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
 
-    /* address search layer (embed) */
-    .addrLayer{
-      display:none;
-      border:1px solid var(--line);
-      border-radius:14px;
-      overflow:hidden;
-      height:420px;
-      background:#fff;
-      margin-top:10px;
-    }
+    .addrLayer{display:none;border:1px solid var(--line);border-radius:14px;overflow:hidden;height:420px;background:#fff;margin-top:10px;}
     .addrLayer.open{display:block;}
 
-    /* account info */
-    .accountBox{
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:#f9fafb;
-      padding:12px;
-    }
+    .accountBox{border:1px solid var(--line);border-radius:14px;background:#f9fafb;padding:12px;}
     .accountBox .title{font-weight:900;margin:0 0 6px;}
     .accountBox .text{margin:0;color:var(--muted);font-size:12.5px;line-height:1.55;}
     .kvs{display:grid;grid-template-columns:120px 1fr;gap:8px 10px;font-size:13px;line-height:1.35;}
     @media (max-width:520px){.kvs{grid-template-columns:1fr}}
 
-    /* step1 cart preview */
     .cartPreviewEmpty{font-size:12px;color:var(--muted);line-height:1.5;}
+
+    .closedBanner{
+      padding:10px 12px;margin-bottom:10px;border:1px solid #fecaca;background:#fff1f2;border-radius:12px;
+      color:#b91c1c;font-weight:900;
+    }
   </style>
 </head>
 
@@ -303,7 +158,6 @@
     <div class="card">
       <div class="cardBody">
 
-        <!-- SECTION 1 -->
         <div class="section active" id="section1">
           <div class="row" style="justify-content:space-between;">
             <div>
@@ -320,7 +174,6 @@
           <div class="divider"></div>
 
           <div class="step1Grid">
-            <!-- left: products -->
             <div class="panel">
               <div class="panelHeader">
                 <h3>상품 목록</h3>
@@ -332,7 +185,6 @@
               </div>
             </div>
 
-            <!-- right: cart preview -->
             <div class="panel">
               <div class="panelHeader">
                 <h3>장바구니</h3>
@@ -348,7 +200,6 @@
                   <div class="sumRow"><span class="muted">배송비</span><strong id="shipFeeLine">0원</strong></div>
                   <div class="sumRow"><span>총 결제금액(실결제 없음)</span><strong id="grandTotal">0원</strong></div>
                   <div class="miniHint" id="shipReason" style="margin-top:8px;"></div>
-                  <!-- ✅ 최소주문금액 안내 -->
                   <div class="miniHint" id="minOrderHint" style="margin-top:6px;"></div>
                 </div>
 
@@ -362,7 +213,6 @@
           </div>
         </div>
 
-        <!-- SECTION 2 -->
         <div class="section" id="section2">
           <h2 style="margin:0;font-size:15px;letter-spacing:-.1px;">주문자(요청자) 정보</h2>
           <div class="muted" style="font-size:12px;margin-top:6px;">주문은 회사 사람이 해도, 수령자는 가족/지인으로 설정 가능합니다.</div>
@@ -396,7 +246,6 @@
           </div>
         </div>
 
-        <!-- SECTION 3 -->
         <div class="section" id="section3">
           <h2 style="margin:0;font-size:15px;letter-spacing:-.1px;">수령자(배송 정보)</h2>
           <div class="muted" style="font-size:12px;margin-top:6px;">우편번호 기준으로 제주/도서산간 추가배송비가 자동 적용됩니다.</div>
@@ -439,9 +288,7 @@
             </div>
           </div>
 
-          <!-- 주소검색 embed 영역 -->
           <div class="addrLayer" id="addrLayer"></div>
-
           <div class="help" id="addrHelp"></div>
 
           <div class="divider"></div>
@@ -459,7 +306,6 @@
           </div>
         </div>
 
-        <!-- SECTION 4 -->
         <div class="section" id="section4">
           <h2 style="margin:0;font-size:15px;letter-spacing:-.1px;">최종 확인</h2>
           <div class="muted" style="font-size:12px;margin-top:6px;">요약을 확인하고 제출하세요.</div>
@@ -509,7 +355,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <!-- Gate (동의) -->
   <div class="backdrop open" id="gateBackdrop" aria-hidden="false">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
       <div class="modalHeader">
@@ -518,6 +363,8 @@
       </div>
       <div class="modalBody">
         <div class="policy" id="policyBox">
+          <div class="closedBanner" id="closedBanner" style="display:none;"></div>
+
 <b>[필수 확인 사항]</b><br><br>
 
 1) 본 사내구매는 <b>재판매 또는 영리 목적 사용은 금지</b>되어 있습니다.<br> 
@@ -567,7 +414,6 @@
     </div>
   </div>
 
-  <!-- Summary Modal -->
   <div class="backdrop" id="summaryBackdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
       <div class="modalHeader">
@@ -625,30 +471,17 @@
   </div>
 
   <script>
-    /**********************************************************
-     * (숨김) 제출 엔드포인트: 사이트에는 언급/표시 없음
-     **********************************************************/
+    const ORDER_CLOSED = true;
+    const ORDER_CLOSED_MSG = "현재 주문이 마감되었습니다. (2026 설맞이 임직원 구매 신청 종료)";
+
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzm2Yjy6K5hj8o79IL-_YTgMyD7VTi9VO0JJEfhOzo42rHOhOhTAMpeOPO5chpggPLW/exec";
 
-    /**********************************************************
-     * ✅ 최소 주문금액 (상품 합계 기준)
-     **********************************************************/
     const MIN_ORDER_AMOUNT = 20000;
 
-    /**********************************************************
-     * ✅ 품목별 최대 주문 수량
-     **********************************************************/
     const MAX_QTY_PER_ITEM = 100;
-    const ITEM_MAX_QTY = {
-      "KT-02": 1,
-    };
-    function getItemMaxQty(productId){
-      return ITEM_MAX_QTY[productId] ?? MAX_QTY_PER_ITEM;
-    }
+    const ITEM_MAX_QTY = { "KT-02": 1 };
+    const getItemMaxQty = (productId)=> ITEM_MAX_QTY[productId] ?? MAX_QTY_PER_ITEM;
 
-    /**********************************************************
-     * 배송비 정책 (우편번호 기준)
-     **********************************************************/
     const SHIPPING_BASE_FEE = 0;
     const SHIPPING_JEJU_FEE = 3000;
     const SHIPPING_ISLAND_FEE = 5000;
@@ -664,36 +497,6 @@
       ]},
     ];
 
-    function zipToInt(zip){
-      const n = parseInt(String(zip || "").replace(/\D/g, ""), 10);
-      return Number.isFinite(n) ? n : null;
-    }
-    function matchZip(zipInt, ranges){
-      for (const [s,e] of ranges){
-        if (zipInt >= s && zipInt <= e) return true;
-      }
-      return false;
-    }
-    function shippingByZip(zip){
-      const z = zipToInt(zip);
-      if (z === null) return { fee: SHIPPING_BASE_FEE, reason: "기본 무료배송" };
-
-      const jejuRule = ZIP_RULES.find(r => r.type === "jeju");
-      if (jejuRule && matchZip(z, jejuRule.ranges)) {
-        return { fee: SHIPPING_JEJU_FEE, reason: "제주 추가배송비" };
-      }
-
-      const islandRule = ZIP_RULES.find(r => r.type === "island");
-      if (islandRule && matchZip(z, islandRule.ranges)) {
-        return { fee: SHIPPING_ISLAND_FEE, reason: "도서산간 추가배송비" };
-      }
-
-      return { fee: SHIPPING_BASE_FEE, reason: "기본 무료배송" };
-    }
-
-    /**********************************************************
-     * 데이터
-     **********************************************************/
     const CATEGORIES = [
       { key: "면도기", label: "면도기" },
       { key: "주방용품", label: "주방용품" },
@@ -701,20 +504,17 @@
     ];
 
     const PRODUCTS = [
-      // 면도기 5
-      { id:"RZ-01", category:"면도기", name:"터치3 휴대용면도기 2입", price:4000, desc:"2입 x 20개 구성", detail:"", longDesc:"Touch3 휴대용 면도기 2입", image:"RZ-01.jpg", discount: 88, soldOut: false,packQty: "x20" },
+      { id:"RZ-01", category:"면도기", name:"터치3 휴대용면도기 2입", price:4000, desc:"2입 x 20개 구성", detail:"", longDesc:"Touch3 휴대용 면도기 2입", image:"RZ-01.jpg", discount: 88, soldOut: false, packQty: "x20" },
       { id:"RZ-02", category:"면도기", name:"페이스6 골드기획 2호", price:10000, desc:"10SET 구성", detail:"", longDesc:"1) PACE6 면도기(날포함) 1ea\n2) PACE6 면도날 4ea\n\nPACE시스템 전제품 호환 가능", image:"RZ-02.jpg", discount: 90, soldOut: false, packQty: "x10" },
       { id:"RZ-03", category:"면도기", name:"페이스3D 모션 홈쇼핑기획 4호 1+1", price:10000, desc:"폼 유통기한: 26년 4월", detail:"", longDesc:"1) 3D모션 면도기(날포함) 1ea\n2) 3D모션 면도날 11ea\n3) 네이비 스탠드 1ea\n4) PACE 아쿠아 쉐이빙폼 250ml 1ea\n\n폼 유통기한: 26년 4월", image:"RZ-03.jpg", discount: 92, soldOut: false, packQty: "1+1" },
       { id:"RZ-04", category:"면도기", name:"이브 크리미 기획세트 2호 1+1", price:5000, desc:"", detail:"폼 유통기한: 26년 4월", longDesc:"1) 이브 크리미 면도기(날포함) 1ea\n2) 샤이 크리미 면도날 1ea\n3) 샤이 심플 눈썹면도기 3ea\n4) 샤이 비키니 면도기 1ea\n5) 페이스 프레쉬 폼 250ml 1ea\n\n폼 유통기한: 26년 4월", image:"RZ-04.jpg", discount: 90, soldOut: false, packQty: "1+1" },
       { id:"RZ-05", category:"면도기", name:"슬릭모션 온라인 기획세트1호", price:25000, desc:"", detail:"", longDesc:"1) 슬릭모션 면도기(날포함) 1ea\n2) 면도날 9ea", image:"RZ-05.jpg", discount: 54, soldOut: false },
 
-      // 주방용품 4
       { id:"KT-01", category:"주방용품", name:"인테리어 라임 기획세트 1호", price:25000, desc:"-", detail:"", longDesc:"1) 인테리어 다용도식도 190mm(라임) 1ea\n2) 인테리어 야채용식도 170mm(라임) 1ea\n3) 인테리어 과도 120mm(라임) 1ea\n4) 인테리어 가위 110S(라임) 1ea", image:"KT-01.jpg", discount: 74, soldOut: false },
       { id:"KT-02", category:"주방용품", name:"뉴클래식 라이트 특판세트 1호 1+1", price:20000, desc:"한정판매 85세트", detail:"1인 1개 한정 판매", longDesc:"1) 베이직 가위 120S 1ea\n2) 뉴클래식라이트 다용도식도 200mm 1ea\n3) 뉴클래식 라이트 야채용식도 165mm 1ea\n\n★한정판매 85세트", image:"KT-02.jpg", discount: 85, soldOut: true, packQty: "1+1" },
       { id:"KT-03", category:"주방용품", name:"클래식 키친툴 4종 세트", price:10000, desc:"한정판매 280세트", detail:"", longDesc:"1) 클래식 삼각 뒤지개 1ea\n2) 클래식 면국자 1ea\n3) 클래식 요리스푼(중) 1ea\n4) 클래식 뒤지개 1ea\n\n★한정판매 280세트", image:"KT-03.jpg", discount: 79, soldOut: false },
       { id:"KT-04", category:"주방용품", name:"클래식 키친툴 3종 세트", price:3000, desc:"-", detail:"", longDesc:"1) 클래식 삼각 뒤지개 1ea\n2) 클래식 면국자 1ea\n3) 클래식 요리스푼(중) 1ea", image:"KT-04.jpg", discount: 91, soldOut: false },
 
-      // 쿡웨어 2
       { id:"CW-01", category:"쿡웨어", name:"포레스타 시즌3 IH 7종세트", price:50000, desc:"-", detail:"", longDesc:"1) 포레스타 IH 편수 20cm 1ea\n2) 포레스타 IH 프라이팬 28cm 2ea\n3) 포레스타 IH 궁중팬 26cm 1ea\n4) 포레스타 IH 전골팬 26cm 1ea\n5) 유리뚜껑 20cm 1ea\n6) 유리뚜껑 26cm 1ea\n7) 증정품 귀리쌀 (포장일 2023년)", image:"CW-01.jpg", discount: 69, soldOut: false },
       { id:"CW-02", category:"쿡웨어", name:"애쉬블루 IH 프라이팬 2종 세트 1호", price:10000, desc:"", detail:"박스 미세흠집 가능", longDesc:"1) 애쉬블루 프라이팬 24cm 1ea\n2) 애쉬블루 프라이팬 28cm 1ea \n본 상품은 특가 판매 상품으로, 박스 상태에 경미한 흠집이나 눌림이 있을 수 있으며, 해당 사유로 교환/반품은 어렵습니다.", image:"CW-02.jpg", discount: 83, soldOut: false },
     ];
@@ -737,17 +537,32 @@
       setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    function calcItemsTotal(){
+    const zipToInt = (zip)=>{
+      const n = parseInt(String(zip || "").replace(/\D/g, ""), 10);
+      return Number.isFinite(n) ? n : null;
+    };
+    const matchZip = (zipInt, ranges)=> ranges.some(([s,e])=> zipInt>=s && zipInt<=e);
+
+    function shippingByZip(zip){
+      const z = zipToInt(zip);
+      if (z === null) return { fee: SHIPPING_BASE_FEE, reason: "기본 무료배송" };
+
+      const jejuRule = ZIP_RULES.find(r => r.type === "jeju");
+      if (jejuRule && matchZip(z, jejuRule.ranges)) return { fee: SHIPPING_JEJU_FEE, reason: "제주 추가배송비" };
+
+      const islandRule = ZIP_RULES.find(r => r.type === "island");
+      if (islandRule && matchZip(z, islandRule.ranges)) return { fee: SHIPPING_ISLAND_FEE, reason: "도서산간 추가배송비" };
+
+      return { fee: SHIPPING_BASE_FEE, reason: "기본 무료배송" };
+    }
+
+    const calcItemsTotal = ()=> {
       let total = 0;
       for (const {product, qty} of state.cart.values()) total += product.price * qty;
       return total;
-    }
-    function calcGrandTotal(){ return calcItemsTotal() + state.shipFee; }
-
-    // ✅ 최소주문금액 체크
-    function minOrderOk(){
-      return calcItemsTotal() >= MIN_ORDER_AMOUNT;
-    }
+    };
+    const calcGrandTotal = ()=> calcItemsTotal() + state.shipFee;
+    const minOrderOk = ()=> calcItemsTotal() >= MIN_ORDER_AMOUNT;
 
     function setStep(active){
       ["1","2","3","4"].forEach(n=>{
@@ -776,8 +591,6 @@
       el("toStep4").disabled = !(state.cart.size > 0 && minOk && ordererOk && recvOk && addrOk);
 
       el("clearCartBtn").disabled = !(state.cart.size > 0);
-
-      // ✅ 4단계 요약 버튼도 최소금액 미달이면 비활성
       el("submitBtn").disabled = !(state.cart.size > 0 && minOk);
     }
 
@@ -801,10 +614,10 @@
       }
     }
 
-    function getDiscountChipText(p){
+    const getDiscountChipText = (p)=>{
       const d = Number(p.discount);
       return Number.isFinite(d) && d > 0 ? `${d}% 할인` : "";
-    }
+    };
 
     function renderProducts(){
       const wrap = el("products");
@@ -884,7 +697,6 @@
           info.appendChild(chips);
         }
 
-        /* ✅ meta 영역: "폼 유통기한" 문구는 빨간색으로 표시 */
         const metaParts = [p.desc, p.detail].filter(Boolean).map(s=>String(s).trim()).filter(Boolean);
         if (metaParts.length){
           const expiryParts = metaParts.filter(t => /폼\s*유통기한/i.test(t));
@@ -942,20 +754,15 @@
 
         btn.onclick = ()=>{
           const max = getItemMaxQty(p.id);
-
           const raw = parseInt(qty.value || "1", 10);
           const requested = Number.isFinite(raw) ? Math.max(1, raw) : 1;
 
           const curQty = state.cart.get(p.id)?.qty || 0;
           const addable = Math.max(0, max - curQty);
 
-          if (addable === 0) {
-            toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`);
-            return;
-          }
+          if (addable === 0) { toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`); return; }
 
           const willAdd = Math.min(requested, addable);
-
           const msg = (requested > willAdd)
             ? `요청 ${requested}개 중 ${willAdd}개만 담겼습니다 (최대 ${max}개)`
             : "장바구니에 담았습니다";
@@ -977,24 +784,17 @@
       const product = PRODUCTS.find(x=>x.id===productId);
       if(!product) return;
 
-      if(product.soldOut === true){
-        toast("품절된 상품입니다");
-        return;
-      }
+      if(product.soldOut === true){ toast("품절된 상품입니다"); return; }
 
       const max = getItemMaxQty(productId);
       const curQty = state.cart.get(productId)?.qty || 0;
       const nextQty = Math.min(max, curQty + qty);
 
-      if(nextQty === curQty){
-        toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`);
-        return;
-      }
+      if(nextQty === curQty){ toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`); return; }
 
       state.cart.set(productId, {product, qty: nextQty});
 
-      if (opts.toastMsg) toast(opts.toastMsg);
-      else toast("장바구니에 담았습니다");
+      toast(opts.toastMsg || "장바구니에 담았습니다");
 
       renderCartForStep4();
       renderCartPreview();
@@ -1005,28 +805,17 @@
     function changeQty(productId, delta){
       const p = PRODUCTS.find(x=>x.id===productId);
 
-      if(delta > 0 && p && p.soldOut === true){
-        toast("품절된 상품입니다");
-        return;
-      }
-
+      if(delta > 0 && p && p.soldOut === true){ toast("품절된 상품입니다"); return; }
       if(!state.cart.has(productId)) return;
-      const cur = state.cart.get(productId);
 
+      const cur = state.cart.get(productId);
       const max = getItemMaxQty(productId);
 
-      if (delta > 0 && cur.qty >= max){
-        toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`);
-        return;
-      }
+      if (delta > 0 && cur.qty >= max){ toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`); return; }
 
       cur.qty += delta;
 
-      if(cur.qty > max){
-        cur.qty = max;
-        toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`);
-      }
-
+      if(cur.qty > max){ cur.qty = max; toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`); }
       if(cur.qty<=0) state.cart.delete(productId);
       else state.cart.set(productId, cur);
 
@@ -1066,7 +855,6 @@
       el("shipReason2").textContent = r ? `※ ${r}` : "";
       el("shipReasonNow").textContent = r ? `※ ${r}` : "";
 
-      // ✅ 최소주문금액 안내
       const remain = Math.max(0, MIN_ORDER_AMOUNT - itemsTotal);
       el("minOrderHint").textContent =
         (itemsTotal < MIN_ORDER_AMOUNT)
@@ -1110,12 +898,8 @@
         wrap.appendChild(item);
       }
 
-      wrap.querySelectorAll("[data-minus]").forEach(b=>{
-        b.onclick = ()=>changeQty(b.dataset.minus, -1);
-      });
-      wrap.querySelectorAll("[data-plus]").forEach(b=>{
-        b.onclick = ()=>changeQty(b.dataset.plus, +1);
-      });
+      wrap.querySelectorAll("[data-minus]").forEach(b=>{ b.onclick = ()=>changeQty(b.dataset.minus, -1); });
+      wrap.querySelectorAll("[data-plus]").forEach(b=>{ b.onclick = ()=>changeQty(b.dataset.plus, +1); });
     }
 
     function renderCartForStep4(){
@@ -1151,15 +935,10 @@
         wrap.appendChild(item);
       }
 
-      wrap.querySelectorAll("[data-minus]").forEach(b=>{
-        b.onclick = ()=>changeQty(b.dataset.minus, -1);
-      });
-      wrap.querySelectorAll("[data-plus]").forEach(b=>{
-        b.onclick = ()=>changeQty(b.dataset.plus, +1);
-      });
+      wrap.querySelectorAll("[data-minus]").forEach(b=>{ b.onclick = ()=>changeQty(b.dataset.minus, -1); });
+      wrap.querySelectorAll("[data-plus]").forEach(b=>{ b.onclick = ()=>changeQty(b.dataset.plus, +1); });
     }
 
-    /* 주소검색: 팝업 대신 embed */
     function openAddressSearchEmbed(){
       const help = el("addrHelp");
       help.textContent = "";
@@ -1234,11 +1013,8 @@
     }
 
     function openSummary(){
-      // ✅ 최소주문금액 가드 (요약 진입 차단)
-      if(state.cart.size === 0){
-        toast("장바구니가 비어있습니다");
-        return;
-      }
+      if (ORDER_CLOSED){ toast(ORDER_CLOSED_MSG); return; }
+      if(state.cart.size === 0){ toast("장바구니가 비어있습니다"); return; }
       if(!minOrderOk()){
         const remain = Math.max(0, MIN_ORDER_AMOUNT - calcItemsTotal());
         toast(`최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 ( ${fmt(remain)}원 더 담아주세요 )`);
@@ -1310,11 +1086,8 @@
     }
 
     async function submit(payload){
-      // ✅ 최종 제출 전 최소주문금액 가드 (뚫림 방지)
-      if(state.cart.size === 0){
-        toast("장바구니가 비어있습니다");
-        return;
-      }
+      if (ORDER_CLOSED){ toast(ORDER_CLOSED_MSG); return; }
+      if(state.cart.size === 0){ toast("장바구니가 비어있습니다"); return; }
       if(calcItemsTotal() < MIN_ORDER_AMOUNT){
         const remain = Math.max(0, MIN_ORDER_AMOUNT - calcItemsTotal());
         toast(`최소주문금액 미달 (${fmt(remain)}원 더 담아주세요)`);
@@ -1326,14 +1099,6 @@
 
       st.className="status"; st.textContent="전송 중...";
       btn.disabled = true;
-
-      if(!WEB_APP_URL){
-        console.log("ORDER_PAYLOAD:", payload);
-        st.className="status ok"; st.textContent="제출 완료";
-        toast("제출 완료");
-        resetAfterSubmit();
-        return;
-      }
 
       try{
         const res = await fetch(WEB_APP_URL, {
@@ -1384,6 +1149,15 @@
       const agree = el("agreeChk");
       const start = el("startBtn");
 
+      if (ORDER_CLOSED){
+        status.className = "status err";
+        status.textContent = "주문 마감";
+        agree.disabled = true;
+        agree.checked = false;
+        start.disabled = true;
+        return;
+      }
+
       if(state.policyRead){
         status.className = "status ok";
         status.textContent = "스크롤 확인 완료";
@@ -1405,9 +1179,17 @@
       state.policyRead = false;
       box.scrollTop = 0;
       agree.checked = false;
+
+      if (ORDER_CLOSED){
+        const cb = el("closedBanner");
+        cb.style.display = "";
+        cb.textContent = ORDER_CLOSED_MSG;
+      }
+
       updateGateUI();
 
       box.addEventListener("scroll", ()=>{
+        if (ORDER_CLOSED) return;
         const nearBottom = (box.scrollTop + box.clientHeight) >= (box.scrollHeight - 6);
         if(nearBottom && !state.policyRead){
           state.policyRead = true;
@@ -1416,11 +1198,10 @@
         }
       });
 
-      agree.addEventListener("change", ()=>{
-        updateGateUI();
-      });
+      agree.addEventListener("change", ()=>{ updateGateUI(); });
 
       el("startBtn").onclick = ()=>{
+        if (ORDER_CLOSED){ toast(ORDER_CLOSED_MSG); return; }
         if(!(state.policyRead && agree.checked)) return;
         el("gateBackdrop").classList.remove("open");
         el("gateBackdrop").setAttribute("aria-hidden","true");
@@ -1436,9 +1217,7 @@
       el("imgPreviewText").style.display = (text && text.trim()) ? "" : "none";
       el("imgPreview").classList.add("open");
     }
-    function closeImagePreview(){
-      el("imgPreview").classList.remove("open");
-    }
+    function closeImagePreview(){ el("imgPreview").classList.remove("open"); }
 
     function init(){
       el("maxQtyText").textContent = String(MAX_QTY_PER_ITEM);
@@ -1511,7 +1290,6 @@
     init();
   </script>
 
-  <!-- 이미지 확대 프리뷰 -->
   <div class="backdrop" id="imgPreview">
     <div class="modal" style="max-width:520px;">
       <div class="modalHeader">
