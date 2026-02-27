@@ -120,8 +120,13 @@
     .toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 12px;border-radius:999px;font-size:13px;box-shadow:0 12px 30px rgba(17,24,39,.22);opacity:0;pointer-events:none;transition:opacity .18s ease, transform .18s ease;z-index:60;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
 
+    /* [개선 3] 주소 레이어: 모바일에서 모달 방식으로 분기되므로 PC용 인라인 레이어만 유지 */
     .addrLayer{display:none;border:1px solid var(--line);border-radius:14px;overflow:hidden;height:420px;background:#fff;margin-top:10px;}
     .addrLayer.open{display:block;}
+
+    /* [개선 3] 모바일 주소검색 모달 */
+    .addrModalLayer{display:none;border:1px solid var(--line);border-radius:0;overflow:hidden;width:100%;height:100%;background:#fff;}
+    .addrModalLayer.open{display:block;}
 
     .accountBox{border:1px solid var(--line);border-radius:14px;background:#f9fafb;padding:12px;}
     .accountBox .title{font-weight:900;margin:0 0 6px;}
@@ -130,6 +135,60 @@
     @media (max-width:520px){.kvs{grid-template-columns:1fr}}
 
     .cartPreviewEmpty{font-size:12px;color:var(--muted);line-height:1.5;}
+
+    /* ================================================================
+       [개선 1] 주문 마감: 전체 화면 덮는 마감 안내 배너
+       ================================================================ */
+    .closedFullBanner{
+      background:#fff1f2;
+      border:1.5px solid #fecaca;
+      border-radius:16px;
+      padding:28px 24px;
+      text-align:center;
+      margin-bottom:20px;
+    }
+    .closedFullBanner .closedIcon{font-size:40px;margin-bottom:12px;}
+    .closedFullBanner .closedTitle{font-size:18px;font-weight:900;color:#b91c1c;margin:0 0 8px;}
+    .closedFullBanner .closedMsg{font-size:13px;color:#7f1d1d;line-height:1.6;margin:0;}
+
+    /* 마감 시 정책 내용 흐리게 처리 */
+    .policyDisabled{opacity:.4;pointer-events:none;user-select:none;}
+
+    /* ================================================================
+       [개선 2] 최소 주문 금액 프로그레스 바
+       ================================================================ */
+    .minOrderBar{
+      margin-top:10px;
+      background:#f3f4f6;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+    }
+    .minOrderBarLabel{
+      display:flex;
+      justify-content:space-between;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+    .minOrderBarLabel .highlight{color:#111827;font-weight:900;}
+    .minOrderBarTrack{
+      width:100%;
+      height:8px;
+      background:#e5e7eb;
+      border-radius:999px;
+      overflow:hidden;
+    }
+    .minOrderBarFill{
+      height:100%;
+      background:#111827;
+      border-radius:999px;
+      transition:width .35s cubic-bezier(.4,0,.2,1);
+      width:0%;
+    }
+    .minOrderBarFill.done{background:#059669;}
+    .minOrderBarMsg{font-size:12px;margin-top:6px;color:var(--muted);}
+    .minOrderBarMsg.ok{color:#065f46;font-weight:900;}
 
     .closedBanner{
       padding:10px 12px;margin-bottom:10px;border:1px solid #fecaca;background:#fff1f2;border-radius:12px;
@@ -200,7 +259,18 @@
                   <div class="sumRow"><span class="muted">배송비</span><strong id="shipFeeLine">0원</strong></div>
                   <div class="sumRow"><span>총 결제금액(실결제 없음)</span><strong id="grandTotal">0원</strong></div>
                   <div class="miniHint" id="shipReason" style="margin-top:8px;"></div>
-                  <div class="miniHint" id="minOrderHint" style="margin-top:6px;"></div>
+                </div>
+
+                <!-- [개선 2] 최소 주문 금액 프로그레스 바 -->
+                <div class="minOrderBar" id="minOrderBarWrap">
+                  <div class="minOrderBarLabel">
+                    <span>최소 주문 금액</span>
+                    <span><span id="minBarCurrent">0원</span> / <span class="highlight" id="minBarTarget">20,000원</span></span>
+                  </div>
+                  <div class="minOrderBarTrack">
+                    <div class="minOrderBarFill" id="minBarFill"></div>
+                  </div>
+                  <div class="minOrderBarMsg" id="minBarMsg"></div>
                 </div>
 
                 <div class="divider"></div>
@@ -288,6 +358,7 @@
             </div>
           </div>
 
+          <!-- PC용 인라인 주소레이어 -->
           <div class="addrLayer" id="addrLayer"></div>
           <div class="help" id="addrHelp"></div>
 
@@ -355,6 +426,10 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- ================================================================
+       게이트 모달 (필수 안내 / 개인정보 동의)
+       [개선 1] 마감 시: 전체 안내 블록으로 즉시 마감 안내 표시
+       ================================================================ -->
   <div class="backdrop open" id="gateBackdrop" aria-hidden="false">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
       <div class="modalHeader">
@@ -362,13 +437,21 @@
         <span class="status err" id="gateStatus">스크롤 확인 필요</span>
       </div>
       <div class="modalBody">
-        <div class="policy" id="policyBox">
-          <div class="closedBanner" id="closedBanner" style="display:none;"></div>
 
+        <!-- [개선 1] 마감 전체 안내 배너 (ORDER_CLOSED=true 시 JS로 표시) -->
+        <div class="closedFullBanner" id="closedFullBanner" style="display:none;">
+          <div class="closedIcon">🔒</div>
+          <p class="closedTitle">현재 주문이 마감되었습니다</p>
+          <p class="closedMsg" id="closedFullMsg"></p>
+        </div>
+
+        <!-- 정책 본문: 마감 시 흐리게 처리 -->
+        <div id="policySection">
+          <div class="policy" id="policyBox">
 <b>[필수 확인 사항]</b><br><br>
 
-1) 본 사내구매는 <b>재판매 또는 영리 목적 사용은 금지</b>되어 있습니다.<br> 
-2) 세법에 의해 사내구매 연간 구매금액은  <b>200만원 이내로 제한</b>됩니다.<br> 
+1) 본 사내구매는 <b>재판매 또는 영리 목적 사용은 금지</b>되어 있습니다.<br>
+2) 세법에 의해 사내구매 연간 구매금액은 <b>200만원 이내로 제한</b>됩니다.<br>
 3) 신청한 물품은 내부 기준에 따라 <b>승인 또는 반려</b>될 수 있습니다.<br>
 4) 출고는 <b>택배 발송</b>이며 기본 무료이나, 우편번호 기준 <b>제주/도서산간</b> 지역은 추가 배송비가 발생할 수 있습니다.<br>
 5) 수령자, 주소, 연락처 오류로 인한 배송 문제는 재발송이 제한될 수 있습니다.<br>
@@ -380,7 +463,7 @@
 
 <b>[개인정보 수집 및 이용 동의]</b><br><br>
 
-주식회사 도루코(이하 “회사”)는 「개인정보보호법」 제15조 제1항에 따라 아래와 같이 개인정보를 수집·이용합니다.<br>
+주식회사 도루코(이하 "회사")는 「개인정보보호법」 제15조 제1항에 따라 아래와 같이 개인정보를 수집·이용합니다.<br>
 단, 계약이 체결되지 않은 경우 수집된 개인정보는 즉시 파기됩니다.<br><br>
 
 <b>1. 수집 항목</b><br>
@@ -398,15 +481,17 @@
 귀하는 개인정보 제공을 거부할 권리가 있으며, 거부 시 주문이 제한될 수 있습니다.<br><br>
 
 <b>※ 아래까지 스크롤하여 전체 내용을 확인해주세요.</b>
-        </div>
+          </div>
 
-        <div class="checkRow">
-          <input type="checkbox" id="agreeChk" disabled>
-          <div>
-            <b>위 안내사항을 모두 읽었고 동의합니다.</b><br>
-            <span class="muted" style="font-size:12px;">스크롤 완료 후 체크가 활성화됩니다.</span>
+          <div class="checkRow">
+            <input type="checkbox" id="agreeChk" disabled>
+            <div>
+              <b>위 안내사항을 모두 읽었고 동의합니다.</b><br>
+              <span class="muted" style="font-size:12px;">스크롤 완료 후 체크가 활성화됩니다.</span>
+            </div>
           </div>
         </div>
+
       </div>
       <div class="modalFooter">
         <button class="btn primary" id="startBtn" disabled>시작하기</button>
@@ -414,6 +499,7 @@
     </div>
   </div>
 
+  <!-- 요약 모달 -->
   <div class="backdrop" id="summaryBackdrop" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
       <div class="modalHeader">
@@ -470,9 +556,36 @@
     </div>
   </div>
 
+  <!-- [개선 3] 모바일 주소 검색 전용 모달 -->
+  <div class="backdrop" id="addrMobileBackdrop" aria-hidden="true" style="padding:0;">
+    <div class="modal" style="width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;display:flex;flex-direction:column;">
+      <div class="modalHeader" style="flex:0 0 auto;">
+        <h3>주소 검색</h3>
+        <button class="btn" id="addrMobileCloseBtn">닫기</button>
+      </div>
+      <div style="flex:1 1 auto;overflow:hidden;position:relative;">
+        <div class="addrModalLayer" id="addrMobileLayer" style="height:100%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이미지 미리보기 모달 -->
+  <div class="backdrop" id="imgPreview">
+    <div class="modal" style="max-width:520px;">
+      <div class="modalHeader">
+        <h3 id="imgPreviewTitle"></h3>
+        <button class="btn" onclick="closeImagePreview()">닫기</button>
+      </div>
+      <div class="modalBody" style="text-align:center;">
+        <img id="imgPreviewTarget" style="max-width:100%;border-radius:12px;">
+        <div id="imgPreviewText" style="margin-top:10px;text-align:left;font-size:13px;line-height:1.5;color:var(--muted);white-space:pre-line;"></div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const ORDER_CLOSED = true;
-    const ORDER_CLOSED_MSG = "현재 주문이 마감되었습니다. (2026 설맞이 임직원 구매 신청 종료)";
+    const ORDER_CLOSED_MSG = "현재 주문이 마감되었습니다. (2026 설맞이 임직원 구매 신청 종료)\n다음 신청 일정은 사내 공지를 확인해주세요.";
 
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzm2Yjy6K5hj8o79IL-_YTgMyD7VTi9VO0JJEfhOzo42rHOhOhTAMpeOPO5chpggPLW/exec";
 
@@ -546,13 +659,10 @@
     function shippingByZip(zip){
       const z = zipToInt(zip);
       if (z === null) return { fee: SHIPPING_BASE_FEE, reason: "기본 무료배송" };
-
       const jejuRule = ZIP_RULES.find(r => r.type === "jeju");
       if (jejuRule && matchZip(z, jejuRule.ranges)) return { fee: SHIPPING_JEJU_FEE, reason: "제주 추가배송비" };
-
       const islandRule = ZIP_RULES.find(r => r.type === "island");
       if (islandRule && matchZip(z, islandRule.ranges)) return { fee: SHIPPING_ISLAND_FEE, reason: "도서산간 추가배송비" };
-
       return { fee: SHIPPING_BASE_FEE, reason: "기본 무료배송" };
     }
 
@@ -641,11 +751,7 @@
           img.loading = "lazy";
           img.style.cursor = "pointer";
           img.onerror = () => { thumb.innerHTML = `<div class="ph">IMG</div>`; };
-          img.onclick = ()=>openImagePreview(
-            p.image,
-            p.name,
-            (p.longDesc || p.detail || p.desc || "").trim()
-          );
+          img.onclick = ()=>openImagePreview(p.image, p.name, (p.longDesc || p.detail || p.desc || "").trim());
           thumb.appendChild(img);
 
           if (p.packQty){
@@ -693,25 +799,16 @@
           chips.appendChild(c);
         }
 
-        if (chips.childElementCount > 0){
-          info.appendChild(chips);
-        }
+        if (chips.childElementCount > 0) info.appendChild(chips);
 
         const metaParts = [p.desc, p.detail].filter(Boolean).map(s=>String(s).trim()).filter(Boolean);
         if (metaParts.length){
           const expiryParts = metaParts.filter(t => /폼\s*유통기한/i.test(t));
           const normalParts = metaParts.filter(t => !/폼\s*유통기한/i.test(t));
-
           const meta = document.createElement("p");
           meta.className = "productMeta";
-
           const normalText = normalParts.join(" · ").trim();
-          if (normalText){
-            const s = document.createElement("span");
-            s.textContent = normalText;
-            meta.appendChild(s);
-          }
-
+          if (normalText){ const s = document.createElement("span"); s.textContent = normalText; meta.appendChild(s); }
           if (expiryParts.length){
             if (normalText) meta.appendChild(document.createElement("br"));
             const e = document.createElement("span");
@@ -719,7 +816,6 @@
             e.textContent = expiryParts.join(" / ");
             meta.appendChild(e);
           }
-
           info.appendChild(meta);
         }
 
@@ -739,12 +835,7 @@
         qtyWrap.className = "row";
 
         const qty = document.createElement("input");
-        qty.type="number";
-        qty.min="1";
-        qty.max=String(getItemMaxQty(p.id));
-        qty.step="1";
-        qty.value="1";
-        qty.className="qty";
+        qty.type="number"; qty.min="1"; qty.max=String(getItemMaxQty(p.id)); qty.step="1"; qty.value="1"; qty.className="qty";
         if (isSoldOut) qty.disabled = true;
 
         const btn = document.createElement("button");
@@ -756,17 +847,13 @@
           const max = getItemMaxQty(p.id);
           const raw = parseInt(qty.value || "1", 10);
           const requested = Number.isFinite(raw) ? Math.max(1, raw) : 1;
-
           const curQty = state.cart.get(p.id)?.qty || 0;
           const addable = Math.max(0, max - curQty);
-
           if (addable === 0) { toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`); return; }
-
           const willAdd = Math.min(requested, addable);
           const msg = (requested > willAdd)
             ? `요청 ${requested}개 중 ${willAdd}개만 담겼습니다 (최대 ${max}개)`
             : "장바구니에 담았습니다";
-
           addToCart(p.id, willAdd, { toastMsg: msg });
         };
 
@@ -783,19 +870,13 @@
     function addToCart(productId, qty, opts = {}){
       const product = PRODUCTS.find(x=>x.id===productId);
       if(!product) return;
-
       if(product.soldOut === true){ toast("품절된 상품입니다"); return; }
-
       const max = getItemMaxQty(productId);
       const curQty = state.cart.get(productId)?.qty || 0;
       const nextQty = Math.min(max, curQty + qty);
-
       if(nextQty === curQty){ toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`); return; }
-
       state.cart.set(productId, {product, qty: nextQty});
-
       toast(opts.toastMsg || "장바구니에 담았습니다");
-
       renderCartForStep4();
       renderCartPreview();
       renderTotals();
@@ -804,21 +885,15 @@
 
     function changeQty(productId, delta){
       const p = PRODUCTS.find(x=>x.id===productId);
-
       if(delta > 0 && p && p.soldOut === true){ toast("품절된 상품입니다"); return; }
       if(!state.cart.has(productId)) return;
-
       const cur = state.cart.get(productId);
       const max = getItemMaxQty(productId);
-
       if (delta > 0 && cur.qty >= max){ toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`); return; }
-
       cur.qty += delta;
-
       if(cur.qty > max){ cur.qty = max; toast(`해당 품목은 최대 ${max}개까지 주문 가능합니다`); }
       if(cur.qty<=0) state.cart.delete(productId);
       else state.cart.set(productId, cur);
-
       renderCartForStep4();
       renderCartPreview();
       renderTotals();
@@ -833,6 +908,29 @@
       validateStepButtons();
       toast("장바구니를 비웠습니다");
       setStep(1);
+    }
+
+    /* ================================================================
+       [개선 2] 최소 주문 금액 프로그레스 바 렌더링
+       ================================================================ */
+    function renderMinOrderBar(itemsTotal){
+      const pct = Math.min(100, Math.round((itemsTotal / MIN_ORDER_AMOUNT) * 100));
+      const fill = el("minBarFill");
+      fill.style.width = pct + "%";
+      fill.classList.toggle("done", itemsTotal >= MIN_ORDER_AMOUNT);
+
+      el("minBarCurrent").textContent = fmt(itemsTotal) + "원";
+      el("minBarTarget").textContent = fmt(MIN_ORDER_AMOUNT) + "원";
+
+      const msg = el("minBarMsg");
+      if(itemsTotal >= MIN_ORDER_AMOUNT){
+        msg.textContent = "✓ 최소 주문 금액 충족되었습니다";
+        msg.className = "minOrderBarMsg ok";
+      } else {
+        const remain = MIN_ORDER_AMOUNT - itemsTotal;
+        msg.textContent = `${fmt(remain)}원 더 담으면 주문이 가능합니다`;
+        msg.className = "minOrderBarMsg";
+      }
     }
 
     function renderTotals(){
@@ -855,11 +953,8 @@
       el("shipReason2").textContent = r ? `※ ${r}` : "";
       el("shipReasonNow").textContent = r ? `※ ${r}` : "";
 
-      const remain = Math.max(0, MIN_ORDER_AMOUNT - itemsTotal);
-      el("minOrderHint").textContent =
-        (itemsTotal < MIN_ORDER_AMOUNT)
-          ? `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 (현재 ${fmt(itemsTotal)}원 / ${fmt(remain)}원 더 담아주세요)`
-          : `※ 최소주문금액 ${fmt(MIN_ORDER_AMOUNT)}원 충족`;
+      // [개선 2] 프로그레스 바 업데이트 (기존 minOrderHint 대체)
+      renderMinOrderBar(itemsTotal);
     }
 
     function renderCartPreview(){
@@ -878,7 +973,6 @@
       for(const [id,{product,qty}] of state.cart.entries()){
         const max = getItemMaxQty(id);
         const plusDisabled = (qty >= max) || (product.soldOut === true);
-
         const item = document.createElement("div");
         item.className="cartItem";
         item.innerHTML = `
@@ -915,7 +1009,6 @@
       for(const [id,{product,qty}] of state.cart.entries()){
         const max = getItemMaxQty(id);
         const plusDisabled = (qty >= max) || (product.soldOut === true);
-
         const item = document.createElement("div");
         item.className="cartItem";
         item.innerHTML = `
@@ -934,10 +1027,14 @@
         `;
         wrap.appendChild(item);
       }
-
       wrap.querySelectorAll("[data-minus]").forEach(b=>{ b.onclick = ()=>changeQty(b.dataset.minus, -1); });
       wrap.querySelectorAll("[data-plus]").forEach(b=>{ b.onclick = ()=>changeQty(b.dataset.plus, +1); });
     }
+
+    /* ================================================================
+       [개선 3] 주소 검색: 모바일/PC 분기
+       ================================================================ */
+    const isMobile = ()=> window.innerWidth < 768;
 
     function openAddressSearchEmbed(){
       const help = el("addrHelp");
@@ -949,43 +1046,81 @@
         return;
       }
 
-      const layer = el("addrLayer");
+      const onComplete = (data)=>{
+        const addr = data.roadAddress || data.jibunAddress || "";
+        el("zip").value = data.zonecode || "";
+        el("addr1").value = addr;
+
+        // 모바일 모달 닫기
+        if(isMobile()){
+          closeMobileAddrModal();
+          // [개선 3] 주소 입력 완료 후 상세주소 입력란으로 스크롤
+          setTimeout(()=>{
+            el("addr2").focus();
+            el("addr2").scrollIntoView({ behavior:"smooth", block:"center" });
+          }, 200);
+        } else {
+          el("addrLayer").classList.remove("open");
+          el("addr2").focus();
+        }
+
+        recalcShipping();
+        validateStepButtons();
+      };
+
+      if(isMobile()){
+        // 모바일: 팝업 모달 방식
+        openMobileAddrModal(onComplete);
+      } else {
+        // PC: 인라인 임베드 방식
+        const layer = el("addrLayer");
+        layer.classList.add("open");
+        new daum.Postcode({
+          oncomplete: onComplete,
+          onresize: (size)=>{ layer.style.height = Math.max(380, size.height) + "px"; },
+          width: "100%",
+          height: "100%"
+        }).embed(layer);
+      }
+    }
+
+    function openMobileAddrModal(onComplete){
+      const backdrop = el("addrMobileBackdrop");
+      const layer = el("addrMobileLayer");
+
+      // 기존 내용 초기화
+      layer.innerHTML = "";
       layer.classList.add("open");
 
-      new daum.Postcode({
-        oncomplete: function(data){
-          const addr = data.roadAddress || data.jibunAddress || "";
-          el("zip").value = data.zonecode || "";
-          el("addr1").value = addr;
-          layer.classList.remove("open");
-          el("addr2").focus();
+      backdrop.classList.add("open");
+      backdrop.setAttribute("aria-hidden","false");
 
-          recalcShipping();
-          validateStepButtons();
-        },
-        onresize: function(size){
-          layer.style.height = Math.max(380, size.height) + "px";
-        },
+      new daum.Postcode({
+        oncomplete: onComplete,
         width: "100%",
         height: "100%"
       }).embed(layer);
+    }
+
+    function closeMobileAddrModal(){
+      const backdrop = el("addrMobileBackdrop");
+      const layer = el("addrMobileLayer");
+      backdrop.classList.remove("open");
+      backdrop.setAttribute("aria-hidden","true");
+      layer.classList.remove("open");
+      layer.innerHTML = "";
     }
 
     function buildPayload(){
       const items = [];
       for (const {product, qty} of state.cart.values()){
         items.push({
-          id: product.id,
-          category: product.category,
-          name: product.name,
-          unit_price: product.price,
-          qty,
-          line_total: product.price * qty
+          id: product.id, category: product.category, name: product.name,
+          unit_price: product.price, qty, line_total: product.price * qty
         });
       }
       const now = new Date();
       const orderId = `ORD-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}-${now.getTime().toString().slice(-6)}`;
-
       return {
         order_id: orderId,
         created_at: now.toISOString(),
@@ -998,11 +1133,7 @@
         recipient: {
           name: el("recvName").value.trim(),
           phone: el("recvPhone").value.trim(),
-          address: {
-            zip: el("zip").value.trim(),
-            addr1: el("addr1").value.trim(),
-            addr2: el("addr2").value.trim()
-          }
+          address: { zip: el("zip").value.trim(), addr1: el("addr1").value.trim(), addr2: el("addr2").value.trim() }
         },
         shipping: { method: "택배발송", fee: state.shipFee, reason: state.shipFeeReason },
         note: el("note").value.trim(),
@@ -1013,7 +1144,7 @@
     }
 
     function openSummary(){
-      if (ORDER_CLOSED){ toast(ORDER_CLOSED_MSG); return; }
+      if (ORDER_CLOSED){ toast("현재 주문이 마감되었습니다"); return; }
       if(state.cart.size === 0){ toast("장바구니가 비어있습니다"); return; }
       if(!minOrderOk()){
         const remain = Math.max(0, MIN_ORDER_AMOUNT - calcItemsTotal());
@@ -1022,7 +1153,6 @@
       }
 
       const payload = buildPayload();
-
       const kv = el("summaryKV");
       kv.innerHTML = "";
       const rows = [
@@ -1048,8 +1178,7 @@
       payload.items.forEach(it=>{
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${it.category}</td>
-          <td>${it.name}</td>
+          <td>${it.category}</td><td>${it.name}</td>
           <td style="text-align:right;">${fmt(it.unit_price)}원</td>
           <td style="text-align:right;">${fmt(it.qty)}</td>
           <td style="text-align:right;">${fmt(it.line_total)}원</td>
@@ -1060,22 +1189,15 @@
       el("summaryItemsTotal").textContent = `${fmt(payload.items_total)}원`;
       el("summaryShipFee").textContent = `${fmt(payload.shipping.fee)}원`;
       el("summaryGrandTotal").textContent = `${fmt(payload.grand_total)}원`;
-
-      el("sendStatus").className = "status";
-      el("sendStatus").textContent = "전송 대기";
+      el("sendStatus").className = "status"; el("sendStatus").textContent = "전송 대기";
 
       el("copyJsonBtn").onclick = async ()=>{
-        try{
-          await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-          toast("JSON을 복사했습니다");
-        }catch{
-          toast("복사 실패: 브라우저 권한 확인");
-        }
+        try{ await navigator.clipboard.writeText(JSON.stringify(payload, null, 2)); toast("JSON을 복사했습니다"); }
+        catch{ toast("복사 실패: 브라우저 권한 확인"); }
       };
 
       el("confirmSendBtn").disabled = false;
       el("confirmSendBtn").onclick = ()=>submit(payload);
-
       el("summaryBackdrop").classList.add("open");
       el("summaryBackdrop").setAttribute("aria-hidden","false");
     }
@@ -1086,7 +1208,7 @@
     }
 
     async function submit(payload){
-      if (ORDER_CLOSED){ toast(ORDER_CLOSED_MSG); return; }
+      if (ORDER_CLOSED){ toast("현재 주문이 마감되었습니다"); return; }
       if(state.cart.size === 0){ toast("장바구니가 비어있습니다"); return; }
       if(calcItemsTotal() < MIN_ORDER_AMOUNT){
         const remain = Math.max(0, MIN_ORDER_AMOUNT - calcItemsTotal());
@@ -1096,7 +1218,6 @@
 
       const st = el("sendStatus");
       const btn = el("confirmSendBtn");
-
       st.className="status"; st.textContent="전송 중...";
       btn.disabled = true;
 
@@ -1127,23 +1248,18 @@
 
     function resetAfterSubmit(){
       state.cart.clear();
-      renderCartForStep4();
-      renderCartPreview();
-
+      renderCartForStep4(); renderCartPreview();
       el("note").value = "";
-
-      el("zip").value = "";
-      el("addr1").value = "";
-      el("addr2").value = "";
+      el("zip").value = ""; el("addr1").value = ""; el("addr2").value = "";
       state.shipFee = SHIPPING_BASE_FEE;
       state.shipFeeReason = "기본 무료배송";
-
-      renderTotals();
-      validateStepButtons();
-      closeSummary();
-      setStep(1);
+      renderTotals(); validateStepButtons();
+      closeSummary(); setStep(1);
     }
 
+    /* ================================================================
+       [개선 1] 게이트 모달: 마감 시 즉시 전체 안내 + 정책 비활성
+       ================================================================ */
     function updateGateUI(){
       const status = el("gateStatus");
       const agree = el("agreeChk");
@@ -1181,9 +1297,13 @@
       agree.checked = false;
 
       if (ORDER_CLOSED){
-        const cb = el("closedBanner");
-        cb.style.display = "";
-        cb.textContent = ORDER_CLOSED_MSG;
+        // [개선 1] 마감 안내 배너 표시
+        const banner = el("closedFullBanner");
+        banner.style.display = "";
+        el("closedFullMsg").textContent = ORDER_CLOSED_MSG;
+
+        // [개선 1] 정책 섹션 비활성(흐리게)
+        el("policySection").classList.add("policyDisabled");
       }
 
       updateGateUI();
@@ -1201,7 +1321,7 @@
       agree.addEventListener("change", ()=>{ updateGateUI(); });
 
       el("startBtn").onclick = ()=>{
-        if (ORDER_CLOSED){ toast(ORDER_CLOSED_MSG); return; }
+        if (ORDER_CLOSED){ toast("현재 주문이 마감되었습니다"); return; }
         if(!(state.policyRead && agree.checked)) return;
         el("gateBackdrop").classList.remove("open");
         el("gateBackdrop").setAttribute("aria-hidden","true");
@@ -1249,6 +1369,9 @@
 
       el("addrSearchBtn").onclick = openAddressSearchEmbed;
 
+      // [개선 3] 모바일 주소 모달 닫기 버튼
+      el("addrMobileCloseBtn").onclick = closeMobileAddrModal;
+
       el("submitBtn").onclick = openSummary;
       el("closeSummaryBtn").onclick = closeSummary;
       el("summaryBackdrop").addEventListener("click", e=>{
@@ -1273,7 +1396,6 @@
 
       el("sameAsOrdererChk").addEventListener("change", (e) => {
         const on = e.target.checked;
-
         if (on) {
           el("recvName").value = el("ordererName").value.trim();
           el("recvPhone").value = el("ordererPhone").value.trim();
@@ -1282,25 +1404,11 @@
           el("recvName").value = "";
           el("recvPhone").value = "";
         }
-
         validateStepButtons();
       });
     }
 
     init();
   </script>
-
-  <div class="backdrop" id="imgPreview">
-    <div class="modal" style="max-width:520px;">
-      <div class="modalHeader">
-        <h3 id="imgPreviewTitle"></h3>
-        <button class="btn" onclick="closeImagePreview()">닫기</button>
-      </div>
-      <div class="modalBody" style="text-align:center;">
-        <img id="imgPreviewTarget" style="max-width:100%;border-radius:12px;">
-        <div id="imgPreviewText" style="margin-top:10px;text-align:left;font-size:13px;line-height:1.5;color:var(--muted);white-space:pre-line;"></div>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
